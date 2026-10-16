@@ -2,596 +2,550 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sorting Practice</title>
-<style>
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  padding: 24px;
-  font-family: system-ui, "Noto Sans TC", sans-serif;
-  color: #202124;
-  background: #f6f7f9;
-}
-.container {
-  max-width: 1050px;
-  margin: auto;
-  padding: 24px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 16px;
-}
-h2, h3 { margin-top: 0; }
-button, input { font: inherit; }
-button {
-  padding: 9px 14px;
-  border: 1px solid #d5d8df;
-  border-radius: 9px;
-  background: white;
-  cursor: pointer;
-}
-button.primary, button.active {
-  color: white;
-  background: #2563eb;
-  border-color: #2563eb;
-}
-button:disabled { opacity: .4; cursor: not-allowed; }
-.mode-bar, .input-row, .actions {
-  display: flex;
-  gap: 9px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-input {
-  flex: 1;
-  min-width: 180px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 9px;
-}
-.info {
-  padding: 13px;
-  border-radius: 10px;
-  background: #f3f4f6;
-  line-height: 1.7;
-  font-size: 14px;
-  margin-bottom: 16px;
-}
-.board {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin: 20px 0;
-}
-.card {
-  width: 85px;
-  height: 90px;
-  border: 2px solid #d9dce2;
-  border-radius: 10px;
-  background: #fafafa;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  user-select: none;
-  cursor: pointer;
-  touch-action: none;
-}
-.card strong { font-size: 23px; }
-.card small { font-size: 11px; color: #777; }
-.card.selected, .card.over {
-  border-color: #2563eb;
-  background: #eff6ff;
-}
-.card.empty {
-  border: 2px dashed #2563eb;
-  background: #eff6ff;
-}
-.card.dragging { opacity: .4; }
-.storage {
-  display: none;
-  padding: 16px;
-  border: 2px dashed #b8a7eb;
-  border-radius: 12px;
-  margin: 16px 0;
-}
-.storage.visible { display: block; }
-.key-card {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 85px;
-  height: 75px;
-  margin: 10px 12px 0 0;
-  background: #f5f3ff;
-  border: 2px solid #8b5cf6;
-  border-radius: 10px;
-  font-size: 24px;
-  font-weight: bold;
-}
-.status {
-  margin-top: 12px;
-  font-size: 14px;
-  color: #555;
-  line-height: 1.6;
-}
-.hidden { display: none !important; }
-
-/* Merge Sort Tree */
-.tree-scroll {
-  overflow-x: auto;
-  padding: 12px 0 20px;
-}
-.tree {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: max-content;
-}
-.tree-node {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 6px;
-}
-.node-box {
-  display: flex;
-  gap: 4px;
-  padding: 8px;
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
-  border-radius: 9px;
-  white-space: nowrap;
-}
-.node-box span {
-  min-width: 30px;
-  padding: 7px 5px;
-  text-align: center;
-  border-radius: 5px;
-  background: #e2e8f0;
-  font-size: 13px;
-  font-weight: 600;
-}
-.node-box.done {
-  border-color: #16a34a;
-  background: #f0fdf4;
-}
-.node-box.done span { background: #dcfce7; }
-.node-box.current {
-  border: 2px solid #2563eb;
-  background: #eff6ff;
-}
-.node-box.pending {
-  border-style: dashed;
-  color: #64748b;
-}
-.node-label {
-  font-size: 11px;
-  color: #64748b;
-  margin-bottom: 5px;
-}
-.children {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  position: relative;
-  padding-top: 18px;
-}
-.children::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  height: 15px;
-  border-left: 1px solid #94a3b8;
-}
-.children > .tree-node {
-  position: relative;
-}
-.children > .tree-node::before {
-  content: "";
-  position: absolute;
-  top: -3px;
-  height: 16px;
-  border-left: 1px solid #94a3b8;
-}
-
-/* Merge Workspace */
-.workspace {
-  margin-top: 18px;
-  border: 1px solid #d8dce4;
-  border-radius: 13px;
-  padding: 18px;
-}
-.workspace h3 { margin-bottom: 8px; }
-.pointer-info {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin: 12px 0;
-}
-.pointer-info span {
-  background: #f1f5f9;
-  padding: 7px 11px;
-  border-radius: 7px;
-  font-family: monospace;
-}
-.merge-sources {
-  display: flex;
-  gap: 28px;
-  flex-wrap: wrap;
-  margin: 20px 0;
-}
-.source-group { min-width: 160px; }
-.source-group h4 { margin: 0 0 10px; }
-.source-cards, .target-cards {
-  display: flex;
-  gap: 7px;
-  flex-wrap: wrap;
-}
-.merge-card {
-  width: 66px;
-  height: 72px;
-  border: 2px solid #cbd5e1;
-  border-radius: 9px;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 21px;
-  font-weight: bold;
-  user-select: none;
-  touch-action: none;
-}
-.merge-card.available {
-  cursor: grab;
-  border-color: #2563eb;
-  background: #eff6ff;
-}
-.merge-card.used {
-  opacity: .3;
-  cursor: default;
-}
-.merge-card.waiting {
-  opacity: .55;
-}
-.merge-card.target {
-  border-style: dashed;
-  background: #f8fafc;
-}
-.merge-card.target.next {
-  border-color: #2563eb;
-  background: #eff6ff;
-}
-.merge-card.target.filled {
-  border-style: solid;
-  border-color: #16a34a;
-  background: #f0fdf4;
-}
-.merge-card.over {
-  background: #bfdbfe;
-  border-color: #1d4ed8;
-}
-.note {
-  color: #64748b;
-  font-size: 13px;
-  line-height: 1.6;
-}
-@media(max-width:600px) {
-  body { padding: 8px; }
-  .container { padding: 14px; }
-  .card { width: 60px; height: 75px; }
-  .card strong { font-size: 19px; }
-  .merge-card { width: 53px; height: 60px; }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sorting Algorithm Playground</title>
+  <style>
+    :root {
+      --bg:#f5f7fb; --card:#fff; --ink:#202b3c;
+      --muted:#697789; --line:#dce3ec; --blue:#2563eb;
+      --green:#16a34a; --orange:#d97706;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0; background:var(--bg); color:var(--ink);
+      font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;
+      line-height:1.6;
+    }
+    main { max-width:1050px; margin:auto; padding:24px 16px 70px; }
+    h1 { margin:0; font-size:28px; }
+    h2 { margin:0 0 10px; font-size:20px; }
+    h3 { margin:12px 0 6px; font-size:16px; }
+    p { margin:8px 0; }
+    .muted { color:var(--muted); font-size:14px; }
+    .panel {
+      background:var(--card); border:1px solid var(--line);
+      border-radius:15px; padding:20px; margin-top:16px;
+    }
+    .modes,.toolbar,.actions {
+      display:flex; flex-wrap:wrap; gap:9px; align-items:center;
+    }
+    button {
+      border:1px solid var(--line); background:white; color:var(--ink);
+      padding:10px 14px; border-radius:9px; cursor:pointer;
+      font:inherit; font-size:14px;
+    }
+    button:hover:not(:disabled) { border-color:var(--blue); }
+    button.active,.primary {
+      background:var(--blue); border-color:var(--blue); color:white;
+    }
+    button:disabled { opacity:.42; cursor:not-allowed; }
+    input {
+      border:1px solid var(--line); border-radius:9px;
+      padding:10px 12px; font:inherit; width:280px; max-width:100%;
+    }
+    .hidden { display:none !important; }
+    .numbers {
+      display:flex; gap:9px; flex-wrap:wrap;
+      align-items:center; min-height:74px; padding:10px 0;
+    }
+    .tile {
+      width:58px; height:58px; display:flex;
+      justify-content:center; align-items:center;
+      border:2px solid #cbd5e1; border-radius:11px;
+      background:#eff4fb; font-weight:700; font-size:19px;
+      cursor:grab; user-select:none; position:relative;
+    }
+    .tile.selected { background:#dbeafe; border-color:var(--blue); }
+    .tile.pivot { background:#fef3c7; border-color:#f59e0b; }
+    .tile.low { box-shadow:0 0 0 3px #93c5fd; }
+    .tile.high { outline:3px solid #86efac; outline-offset:3px; }
+    .tile.done { background:#dcfce7; border-color:var(--green); }
+    .tile.placeholder {
+      border-style:dashed; color:#94a3b8; background:white;
+    }
+    .tile.small {
+      width:43px; height:43px; font-size:15px;
+      border-radius:8px;
+    }
+    .tile[draggable="true"]:active { cursor:grabbing; }
+    .zone {
+      border:2px dashed #b6c4d7; border-radius:12px;
+      padding:12px; min-height:95px;
+      background:#f9fbff;
+    }
+    .zone.over { border-color:var(--blue); background:#eaf2ff; }
+    .zone-label { font-weight:700; font-size:14px; }
+    .columns {
+      display:grid; grid-template-columns:1fr 1fr;
+      gap:12px; margin-top:12px;
+    }
+    .three {
+      display:grid; grid-template-columns:1fr auto 1fr;
+      gap:12px; align-items:start; margin:16px 0;
+    }
+    .pivot-box {
+      background:#fff3cf; border:2px solid #f59e0b;
+      padding:14px; border-radius:12px; text-align:center;
+      min-width:90px;
+    }
+    .status {
+      background:#eef4ff; border-radius:10px;
+      padding:12px 14px; margin-top:12px; font-size:14px;
+    }
+    .tree {
+      overflow-x:auto; padding:12px 0;
+    }
+    .tree-level {
+      display:flex; justify-content:center; gap:10px;
+      margin:12px 0; min-width:max-content;
+    }
+    .tree-node {
+      border:1px solid var(--line); border-radius:9px;
+      padding:7px 10px; background:#fff; font-size:13px;
+      text-align:center;
+    }
+    .tree-node.finished { background:#dcfce7; }
+    .tree-node.current { border:2px solid var(--blue); }
+    .code {
+      background:#162235; color:#e5edf8; border-radius:12px;
+      padding:15px; font:13px/1.75 Consolas,monospace;
+      white-space:pre; overflow-x:auto;
+    }
+    .code-line { display:block; padding:0 7px; }
+    .code-line.active {
+      background:#334c70; color:#fff;
+      border-left:3px solid #fbbf24;
+    }
+    .pointer-row {
+      display:flex; gap:8px; flex-wrap:wrap; margin:12px 0;
+    }
+    .pill {
+      border-radius:20px; background:#e8eef8;
+      padding:5px 11px; font-size:13px;
+    }
+    .legend { display:flex; flex-wrap:wrap; gap:14px; }
+    .legend span { font-size:13px; }
+    .swatch {
+      display:inline-block; width:12px; height:12px;
+      border-radius:3px; margin-right:5px; vertical-align:middle;
+    }
+    @media(max-width:650px) {
+      .three { grid-template-columns:1fr; }
+      .columns { grid-template-columns:1fr; }
+      .tile { width:48px; height:48px; }
+      .panel { padding:15px; }
+    }
+  </style>
 </head>
-
 <body>
-<div class="container">
-  <h2>Sorting Practice</h2>
+<main>
+  <h1>Sorting Algorithm Playground</h1>
+  <p class="muted">
+    手動練習排序、遞迴拆分與合併，以及 Quick Sort 指標追蹤。
+  </p>
 
-  <div class="mode-bar">
-    <button id="normalBtn" onclick="changeMode('normal')">
-      Normal Mode
-    </button>
-    <button id="storageBtn" onclick="changeMode('storage')">
-      Insertion Storage Mode
-    </button>
-    <button id="mergeBtn" onclick="changeMode('merge')">
-      Merge Sort Mode
-    </button>
-  </div>
-
-  <div class="input-row">
-    <input id="numberInput" value="5A, 5B, 3, 1, 2">
-    <button class="primary" onclick="createCards()">
-      建立卡片
-    </button>
-  </div>
-
-  <div id="instructions" class="info"></div>
-
-  <!-- Normal / Insertion -->
-  <section id="standardSection">
-    <div id="storageArea" class="storage">
-      <strong>Key Storage</strong>
-      <p class="note">模擬 key = arr[i]</p>
-      <div id="keyCard" class="key-card">—</div>
-      <button class="primary" onclick="insertKey()">
-        插入 Key
-      </button>
+  <section class="panel">
+    <div class="modes">
+      <button data-mode="normal" class="active">Normal Mode</button>
+      <button data-mode="storage">Insertion Storage</button>
+      <button data-mode="merge">Merge Sort</button>
+      <button data-mode="quickSimple">Quick Sort 簡單版</button>
+      <button data-mode="quickInplace">Quick Sort 原地交換版</button>
     </div>
-    <div id="board" class="board"></div>
   </section>
 
-  <!-- Merge Sort -->
-  <section id="mergeSection" class="hidden">
+  <section class="panel">
+    <h2>資料設定</h2>
+    <div class="toolbar">
+      <input id="numbersInput" value="5, 3, 8, 1, 2"
+             placeholder="例如：5, 3, 8, 1, 2">
+      <button class="primary" id="applyBtn">套用 / 重設</button>
+      <button id="undoBtn">Undo</button>
+    </div>
+    <p class="muted">
+      輸入 2–12 個數字，可使用 5A、5B 等標記觀察穩定性。
+      比較時以數字部分為準。
+    </p>
+  </section>
+
+  <!-- Normal Mode -->
+  <section id="normalPanel" class="panel">
+    <h2>Normal Mode</h2>
+    <p class="muted">
+      點擊兩個數字可以交換位置；拖曳數字到另一個數字，
+      則會插入該位置，其餘元素依序移動。
+    </p>
+    <div id="normalArray" class="numbers"></div>
+    <div id="normalStatus" class="status"></div>
+  </section>
+
+  <!-- Insertion Storage Mode -->
+  <section id="storagePanel" class="panel hidden">
+    <h2>Insertion Sort — Key Storage</h2>
+    <p class="muted">
+      先取出 Key，接著點擊空位左邊的元素使它向右移動，
+      最後將 Key 插入空位。
+    </p>
+    <h3>原始陣列</h3>
+    <div id="storageArray" class="numbers"></div>
+    <h3>Key Storage</h3>
+    <div id="keyStorage" class="zone"></div>
+    <div class="actions" style="margin-top:12px">
+      <button class="primary" id="insertKeyBtn">插入 Key</button>
+    </div>
+    <div id="storageStatus" class="status"></div>
+  </section>
+
+  <!-- Merge Sort Mode -->
+  <section id="mergePanel" class="panel hidden">
+    <h2>Merge Sort — 手動拆分與合併</h2>
+    <p class="muted">
+      先按 Divide 逐層拆分，再手動選取 L[i] 或 R[j]，
+      填入 arr[k]。完成一組合併才能進入下一組。
+    </p>
     <div class="actions">
-      <button id="divideBtn" class="primary"
-              onclick="divideStep()">Divide 下一層</button>
-      <button id="startMergeBtn" onclick="startMerge()">
-        Start Merge
-      </button>
-      <button id="nextMergeBtn" onclick="nextMerge()">
-        Next Merge
-      </button>
+      <button class="primary" id="divideBtn">Divide 下一層</button>
+      <button id="startMergeBtn" disabled>Start Merge</button>
+      <button id="nextMergeBtn" disabled>Next Merge</button>
     </div>
-
-    <h3>Divide and Conquer Tree</h3>
-    <div class="tree-scroll">
-      <div id="mergeTree" class="tree"></div>
-    </div>
-
-    <div id="mergeWorkspace" class="workspace hidden">
-      <h3 id="mergeTitle">Merge</h3>
-      <div id="pointerInfo" class="pointer-info"></div>
-
-      <div class="merge-sources">
-        <div class="source-group">
-          <h4>L（左半部）</h4>
-          <div id="leftCards" class="source-cards"></div>
+    <div id="mergeTree" class="tree"></div>
+    <div id="mergeWorkspace" class="hidden">
+      <h3 id="mergeTitle">目前合併</h3>
+      <div class="columns">
+        <div>
+          <div class="zone-label">Left — L[i]</div>
+          <div id="mergeLeft" class="numbers"></div>
         </div>
-        <div class="source-group">
-          <h4>R（右半部）</h4>
-          <div id="rightCards" class="source-cards"></div>
+        <div>
+          <div class="zone-label">Right — R[j]</div>
+          <div id="mergeRight" class="numbers"></div>
         </div>
       </div>
-
-      <h4>arr（合併結果）</h4>
-      <div id="targetCards" class="target-cards"></div>
-      <p id="mergeHint" class="note"></p>
+      <div class="pointer-row" id="mergePointers"></div>
+      <h3>目標 arr[k]（可以點擊或拖曳）</h3>
+      <div id="mergeTarget" class="zone numbers"></div>
     </div>
+    <div id="mergeStatus" class="status"></div>
   </section>
 
-  <div class="actions">
-    <button id="undoBtn" onclick="undo()">↶ 上一步</button>
-    <button onclick="reset()">⟳ 重設</button>
-  </div>
+  <!-- Quick Sort Simple -->
+  <section id="quickSimplePanel" class="panel hidden">
+    <h2>Quick Sort — 簡單版（手動拖曳）</h2>
+    <p class="muted">
+      每次選第一個元素作為 Pivot。
+      將其餘數字拖曳到 Left 或 Right，也可以點擊數字後點擊區域。
+      完成後依序遞迴處理左右兩邊。
+    </p>
 
-  <div id="status" class="status"></div>
-</div>
+    <div class="actions">
+      <button id="quickSimpleNextBtn" class="primary">
+        完成 Partition / 下一步
+      </button>
+    </div>
+
+    <h3>目前處理的陣列</h3>
+    <div id="quickSimpleCurrent" class="numbers"></div>
+
+    <div class="three">
+      <div class="zone" id="quickLeftZone" data-side="left">
+        <div class="zone-label">Left（小於 Pivot）</div>
+        <div id="quickLeft" class="numbers"></div>
+      </div>
+      <div class="pivot-box">
+        <div class="muted">Pivot</div>
+        <div id="quickPivot" style="font-size:27px;font-weight:700">—</div>
+      </div>
+      <div class="zone" id="quickRightZone" data-side="right">
+        <div class="zone-label">Right（大於或等於 Pivot）</div>
+        <div id="quickRight" class="numbers"></div>
+      </div>
+    </div>
+
+    <h3>已完成的遞迴結果</h3>
+    <div id="quickSimpleResults"></div>
+    <div id="quickSimpleStatus" class="status"></div>
+  </section>
+
+  <!-- Quick Sort In-place -->
+  <section id="quickInplacePanel" class="panel hidden">
+    <h2>Quick Sort — 原地交換版（自動執行）</h2>
+    <p class="muted">
+      使用你提供的 partition() 寫法。
+      程式自動追蹤 high、low、交換元素、Pivot 歸位，
+      並繼續遞迴處理左右區間。
+    </p>
+    <div class="actions">
+      <button class="primary" id="autoPlayBtn">▶ 自動播放</button>
+      <button id="autoPauseBtn">暫停</button>
+      <button id="autoPrevBtn">上一步</button>
+      <button id="autoNextBtn">下一步</button>
+      <label>
+        速度
+        <select id="autoSpeed" style="padding:9px;border-radius:8px">
+          <option value="1600">慢</option>
+          <option value="900" selected>正常</option>
+          <option value="400">快</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="pointer-row" id="autoPointers"></div>
+    <div id="autoArray" class="numbers"></div>
+    <div class="legend">
+      <span><i class="swatch" style="background:#fbbf24"></i>Pivot</span>
+      <span><i class="swatch" style="background:#93c5fd"></i>low</span>
+      <span><i class="swatch" style="background:#86efac"></i>high</span>
+    </div>
+
+    <h3>程式碼執行位置</h3>
+    <div id="autoCode" class="code"></div>
+    <div id="autoStatus" class="status"></div>
+  </section>
+</main>
 
 <script>
-let initial = ["5A", "5B", "3", "1", "2"];
-let arr = [...initial];
+"use strict";
+
+const $ = id => document.getElementById(id);
+
 let mode = "normal";
-let selected = null;
+let initial = [];
+let normal = [];
+let selectedNormal = null;
+let storage = [];
 let key = null;
-let emptyIndex = null;
+let hole = -1;
 let history = [];
 
-let treeRoot = null;
-let divideDepth = 0;
-let mergeTasks = [];
-let taskIndex = -1;
-let mergeOutput = [];
-let leftIndex = 0;
-let rightIndex = 0;
-let mergeStarted = false;
+const numericValue = value => {
+  const match = String(value).match(/^-?\d+(?:\.\d+)?/);
+  return match ? Number(match[0]) : NaN;
+};
 
-let pointerDrag = null;
-let suppressClick = false;
+function parseNumbers() {
+  const values = $("numbersInput").value
+    .split(",").map(s => s.trim()).filter(Boolean);
 
-// 解析數值，A/B/C 只是標籤
-function numericValue(value) {
-  return parseFloat(value);
+  if (values.length < 2 || values.length > 12 ||
+      values.some(v => !Number.isFinite(numericValue(v)))) {
+    alert("請輸入 2–12 個有效數字，以逗號分隔。");
+    return null;
+  }
+  return values;
+}
+
+function tile(value, options = {}) {
+  const el = document.createElement("div");
+  el.className = "tile" +
+    (options.small ? " small" : "") +
+    (options.selected ? " selected" : "") +
+    (options.pivot ? " pivot" : "") +
+    (options.low ? " low" : "") +
+    (options.high ? " high" : "") +
+    (options.done ? " done" : "");
+
+  el.textContent = value;
+  if (options.click) el.addEventListener("click", options.click);
+  if (options.drag) {
+    el.draggable = true;
+    el.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("text/plain", options.drag);
+      e.dataTransfer.effectAllowed = "move";
+    });
+  }
+  return el;
+}
+
+function setStatus(id, message) {
+  $(id).textContent = message;
 }
 
 function saveHistory() {
   history.push({
-    arr: [...arr],
-    selected,
+    normal: [...normal],
+    selectedNormal,
+    storage: [...storage],
     key,
-    emptyIndex,
-    divideDepth,
-    taskIndex,
-    mergeOutput: [...mergeOutput],
-    leftIndex,
-    rightIndex,
-    mergeStarted,
-    treeState: treeRoot ? serializeTree(treeRoot) : null
+    hole
   });
 }
 
-function serializeTree(node) {
-  return {
-    values: [...node.values],
-    result: node.result ? [...node.result] : null,
-    id: node.id,
-    depth: node.depth,
-    left: node.left ? serializeTree(node.left) : null,
-    right: node.right ? serializeTree(node.right) : null
-  };
-}
-
-function restoreTree(data) {
-  if (!data) return null;
-  return {
-    ...data,
-    values: [...data.values],
-    result: data.result ? [...data.result] : null,
-    left: restoreTree(data.left),
-    right: restoreTree(data.right)
-  };
-}
-
-function restoreState(s) {
-  arr = [...s.arr];
-  selected = s.selected;
-  key = s.key;
-  emptyIndex = s.emptyIndex;
-  divideDepth = s.divideDepth;
-  taskIndex = s.taskIndex;
-  mergeOutput = [...s.mergeOutput];
-  leftIndex = s.leftIndex;
-  rightIndex = s.rightIndex;
-  mergeStarted = s.mergeStarted;
-  treeRoot = restoreTree(s.treeState);
-
-  if (treeRoot) {
-    mergeTasks = [];
-    collectTasks(treeRoot);
+function undo() {
+  if (mode === "normal" || mode === "storage") {
+    const old = history.pop();
+    if (!old) return;
+    normal = old.normal;
+    selectedNormal = old.selectedNormal;
+    storage = old.storage;
+    key = old.key;
+    hole = old.hole;
+    renderNormal();
+    renderStorage();
   } else {
-    mergeTasks = [];
+    alert("這個模式請使用重設按鈕重新開始。");
   }
 }
 
-function changeMode(nextMode) {
-  // 若暫存區還有 key，先取消該輪
-  if (key !== null) {
-    while (history.length && key !== null) {
-      restoreState(history.pop());
+function changeMode(next) {
+  mode = next;
+  stopAuto();
+
+  document.querySelectorAll("[data-mode]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.mode === next);
+  });
+
+  const panels = {
+    normal:"normalPanel",
+    storage:"storagePanel",
+    merge:"mergePanel",
+    quickSimple:"quickSimplePanel",
+    quickInplace:"quickInplacePanel"
+  };
+
+  Object.values(panels).forEach(id => $(id).classList.add("hidden"));
+  $(panels[next]).classList.remove("hidden");
+}
+
+document.querySelectorAll("[data-mode]").forEach(btn => {
+  btn.addEventListener("click", () => changeMode(btn.dataset.mode));
+});
+
+$("applyBtn").addEventListener("click", resetAll);
+$("undoBtn").addEventListener("click", undo);
+
+/* --------------------------------------------------
+   NORMAL MODE
+-------------------------------------------------- */
+
+function renderNormal() {
+  const box = $("normalArray");
+  box.innerHTML = "";
+
+  normal.forEach((value, index) => {
+    const el = tile(value, {
+      selected:selectedNormal === index,
+      drag:`normal:${index}`,
+      click:() => {
+        if (selectedNormal === null) {
+          selectedNormal = index;
+        } else if (selectedNormal === index) {
+          selectedNormal = null;
+        } else {
+          saveHistory();
+          [normal[selectedNormal], normal[index]] =
+            [normal[index], normal[selectedNormal]];
+          selectedNormal = null;
+        }
+        renderNormal();
+      }
+    });
+
+    el.addEventListener("dragover", e => e.preventDefault());
+    el.addEventListener("drop", e => {
+      e.preventDefault();
+      const raw = e.dataTransfer.getData("text/plain");
+      if (!raw.startsWith("normal:")) return;
+
+      const from = Number(raw.split(":")[1]);
+      if (from === index) return;
+
+      saveHistory();
+      const [item] = normal.splice(from, 1);
+      normal.splice(index, 0, item);
+      selectedNormal = null;
+      renderNormal();
+    });
+
+    box.appendChild(el);
+  });
+
+  setStatus("normalStatus",
+    `目前陣列：[${normal.join(", ")}]。點兩個數字交換；拖曳則插入指定位置。`);
+}
+
+/* --------------------------------------------------
+   INSERTION STORAGE MODE
+-------------------------------------------------- */
+
+function renderStorage() {
+  const box = $("storageArray");
+  box.innerHTML = "";
+
+  storage.forEach((value, index) => {
+    if (value === null) {
+      const el = tile("_");
+      el.classList.add("placeholder");
+      box.appendChild(el);
+      return;
     }
+
+    box.appendChild(tile(value, {
+      click:() => {
+        if (key === null) {
+          saveHistory();
+          key = storage[index];
+          storage[index] = null;
+          hole = index;
+        } else if (index === hole - 1) {
+          saveHistory();
+          storage[hole] = storage[index];
+          storage[index] = null;
+          hole = index;
+        }
+        renderStorage();
+      }
+    }));
+  });
+
+  $("keyStorage").innerHTML = "";
+  if (key !== null) {
+    $("keyStorage").appendChild(tile(key, {selected:true}));
+  } else {
+    $("keyStorage").textContent = "尚未取出 Key";
   }
 
-  mode = nextMode;
-  selected = null;
-  history = [];
+  $("insertKeyBtn").disabled = key === null;
 
-  if (mode === "merge") {
-    initMerge();
-  }
-
-  render();
+  setStatus("storageStatus", key === null
+    ? "點擊任一數字取出 Key。"
+    : `Key = ${key}。點擊空位左邊的數字使它右移，最後按「插入 Key」。`);
 }
 
-function createCards() {
-  const values = document.getElementById("numberInput")
-    .value.split(",").map(x => x.trim());
-
-  const valid = values.length === 5 &&
-    values.every(v =>
-      /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)[A-Za-z]*$/.test(v)
-    );
-
-  if (!valid) {
-    document.getElementById("status").textContent =
-      "請輸入五個數字，例如：5A, 5B, 3, 1, 2";
-    return;
-  }
-
-  initial = [...values];
-  reset();
-}
-
-function reset() {
-  arr = [...initial];
-  selected = null;
+$("insertKeyBtn").addEventListener("click", () => {
+  if (key === null || hole < 0) return;
+  saveHistory();
+  storage[hole] = key;
   key = null;
-  emptyIndex = null;
-  history = [];
+  hole = -1;
+  renderStorage();
+});
 
-  initMerge();
-  render();
-}
+/* --------------------------------------------------
+   MERGE SORT MODE
+-------------------------------------------------- */
 
-// ==============================
-// Normal Mode
-// ==============================
+let mergeRoot;
+let mergeLevels;
+let mergeDepth;
+let mergeJobs;
+let mergeJobIndex;
+let mergeState;
+let mergeStarted;
 
-function swap(a, b) {
-  if (a === b) {
-    selected = null;
-    render();
-    return;
-  }
-
-  saveHistory();
-  [arr[a], arr[b]] = [arr[b], arr[a]];
-  selected = null;
-  render();
-}
-
-function moveInsert(from, to) {
-  if (from === to) {
-    render();
-    return;
-  }
-
-  saveHistory();
-  const [item] = arr.splice(from, 1);
-  arr.splice(to, 0, item);
-  selected = null;
-  render();
-}
-
-// ==============================
-// Insertion Storage Mode
-// ==============================
-
-function takeKey(index) {
-  if (key !== null) return;
-
-  saveHistory();
-  key = arr[index];
-  arr[index] = null;
-  emptyIndex = index;
-  render();
-}
-
-function shiftRight(index) {
-  if (key === null || index !== emptyIndex - 1) return;
-
-  saveHistory();
-  arr[emptyIndex] = arr[index];
-  arr[index] = null;
-  emptyIndex = index;
-  render();
-}
-
-function insertKey() {
-  if (key === null) return;
-
-  saveHistory();
-  arr[emptyIndex] = key;
-  key = null;
-  emptyIndex = null;
-  render();
-}
-
-// ==============================
-// Merge Sort: Divide Tree
-// ==============================
-
-let nodeCounter = 0;
-
-function buildTree(values, depth = 0) {
+function makeMergeNode(values, depth = 0) {
   const node = {
-    id: nodeCounter++,
-    values: [...values],
-    result: null,
+    values:[...values],
     depth,
-    left: null,
-    right: null
+    left:null,
+    right:null,
+    result:null
   };
 
   if (values.length > 1) {
     const mid = Math.floor(values.length / 2);
-
-    node.left = buildTree(values.slice(0, mid), depth + 1);
-    node.right = buildTree(values.slice(mid), depth + 1);
+    node.left = makeMergeNode(values.slice(0, mid), depth + 1);
+    node.right = makeMergeNode(values.slice(mid), depth + 1);
   } else {
     node.result = [...values];
   }
@@ -599,517 +553,700 @@ function buildTree(values, depth = 0) {
   return node;
 }
 
-function initMerge() {
-  nodeCounter = 0;
-  treeRoot = buildTree(initial);
-  divideDepth = 0;
-  mergeTasks = [];
-  collectTasks(treeRoot);
-  taskIndex = -1;
-  mergeOutput = [];
-  leftIndex = 0;
-  rightIndex = 0;
-  mergeStarted = false;
+function collectMergeLevels(node, levels = []) {
+  if (!levels[node.depth]) levels[node.depth] = [];
+  levels[node.depth].push(node);
+  if (node.left) {
+    collectMergeLevels(node.left, levels);
+    collectMergeLevels(node.right, levels);
+  }
+  return levels;
 }
 
-// Postorder：先處理左右子樹，最後處理父節點
-function collectTasks(node) {
-  if (!node.left) return;
-
-  collectTasks(node.left);
-  collectTasks(node.right);
-  mergeTasks.push(node);
+function collectMergeJobs(node, jobs = []) {
+  if (node.left) {
+    collectMergeJobs(node.left, jobs);
+    collectMergeJobs(node.right, jobs);
+    jobs.push(node);
+  }
+  return jobs;
 }
 
-function maxDepth(node) {
-  if (!node.left) return node.depth;
+function renderMergeTree() {
+  const box = $("mergeTree");
+  box.innerHTML = "";
 
-  return Math.max(
-    maxDepth(node.left),
-    maxDepth(node.right)
-  );
+  mergeLevels.forEach((nodes, depth) => {
+    if (depth > mergeDepth) return;
+
+    const row = document.createElement("div");
+    row.className = "tree-level";
+
+    nodes.forEach(node => {
+      const el = document.createElement("div");
+      el.className = "tree-node" +
+        (node.result ? " finished" : "") +
+        (mergeStarted &&
+         mergeJobs[mergeJobIndex] === node ? " current" : "");
+      el.textContent = `[${(node.result || node.values).join(", ")}]`;
+      row.appendChild(el);
+    });
+
+    box.appendChild(row);
+  });
 }
 
 function divideStep() {
-  if (mergeStarted || divideDepth >= maxDepth(treeRoot)) return;
-
-  saveHistory();
-  divideDepth++;
-  render();
-}
-
-function renderTreeNode(node) {
-  const wrapper = document.createElement("div");
-  wrapper.className = "tree-node";
-
-  const label = document.createElement("div");
-  label.className = "node-label";
-  label.textContent = "Depth " + node.depth;
-  wrapper.append(label);
-
-  const box = document.createElement("div");
-  box.className = "node-box";
-
-  if (node.result !== null) box.classList.add("done");
-
-  if (mergeStarted &&
-      taskIndex >= 0 &&
-      mergeTasks[taskIndex]?.id === node.id &&
-      node.result === null) {
-    box.classList.add("current");
+  if (mergeDepth < mergeLevels.length - 1) {
+    mergeDepth++;
   }
 
-  const display = node.result !== null
-    ? node.result
-    : node.values;
+  const done = mergeDepth === mergeLevels.length - 1;
+  $("divideBtn").disabled = done;
+  $("startMergeBtn").disabled = !done;
 
-  display.forEach(value => {
-    const span = document.createElement("span");
-    span.textContent = value;
-    box.append(span);
-  });
-
-  wrapper.append(box);
-
-  if (node.left && node.depth < divideDepth) {
-    const children = document.createElement("div");
-    children.className = "children";
-    children.append(
-      renderTreeNode(node.left),
-      renderTreeNode(node.right)
-    );
-    wrapper.append(children);
-  }
-
-  return wrapper;
+  renderMergeTree();
+  setStatus("mergeStatus", done
+    ? "已拆分到單一元素，現在可以開始合併。"
+    : `目前已顯示第 ${mergeDepth + 1} 層，繼續按 Divide。`);
 }
-
-// ==============================
-// Merge Sort: Manual Merge
-// ==============================
 
 function startMerge() {
-  if (divideDepth < maxDepth(treeRoot) || mergeStarted) return;
+  if (mergeDepth < mergeLevels.length - 1) return;
 
-  saveHistory();
   mergeStarted = true;
-  taskIndex = 0;
-  beginCurrentTask();
-  render();
+  mergeJobIndex = 0;
+  $("startMergeBtn").disabled = true;
+  $("mergeWorkspace").classList.remove("hidden");
+
+  setupMergeJob();
 }
 
-function currentTask() {
-  return mergeTasks[taskIndex];
-}
-
-function beginCurrentTask() {
-  mergeOutput = [];
-  leftIndex = 0;
-  rightIndex = 0;
-}
-
-function isTaskComplete() {
-  const task = currentTask();
-  return !!task &&
-    mergeOutput.length === task.values.length;
-}
-
-// 學生選取 L[i] 或 R[j] 填入 arr[k]
-function chooseMergeElement(side) {
-  const task = currentTask();
-
-  if (!task || isTaskComplete()) return;
-
-  const L = task.left.result;
-  const R = task.right.result;
-
-  let value;
-
-  if (side === "L") {
-    if (leftIndex >= L.length) return;
-    value = L[leftIndex];
-  } else {
-    if (rightIndex >= R.length) return;
-    value = R[rightIndex];
-  }
-
-  saveHistory();
-
-  mergeOutput.push(value);
-
-  if (side === "L") {
-    leftIndex++;
-  } else {
-    rightIndex++;
-  }
-
-  // arr 填滿後，將結果寫回父節點
-  if (isTaskComplete()) {
-    task.result = [...mergeOutput];
-  }
-
-  render();
-}
-
-function nextMerge() {
-  if (!mergeStarted || !isTaskComplete()) return;
-  if (taskIndex >= mergeTasks.length - 1) return;
-
-  saveHistory();
-  taskIndex++;
-  beginCurrentTask();
-  render();
-}
-
-// ==============================
-// Render
-// ==============================
-
-function render() {
-  document.getElementById("normalBtn").classList.toggle(
-    "active", mode === "normal"
-  );
-  document.getElementById("storageBtn").classList.toggle(
-    "active", mode === "storage"
-  );
-  document.getElementById("mergeBtn").classList.toggle(
-    "active", mode === "merge"
-  );
-
-  document.getElementById("standardSection").classList.toggle(
-    "hidden", mode === "merge"
-  );
-  document.getElementById("mergeSection").classList.toggle(
-    "hidden", mode !== "merge"
-  );
-
-  const instructions = document.getElementById("instructions");
-
-  if (mode === "normal") {
-    instructions.innerHTML =
-      "<b>Normal Mode</b><br>" +
-      "點擊兩張卡片：交換 Swap。<br>" +
-      "拖曳一張卡片到另一個位置：插入 Insert。";
-  } else if (mode === "storage") {
-    instructions.innerHTML =
-      "<b>Insertion Storage Mode</b><br>" +
-      "① 點擊卡片取出 key。<br>" +
-      "② 點擊空格左邊的卡片，讓它向右移。<br>" +
-      "③ 最後按「插入 Key」。";
-  } else {
-    instructions.innerHTML =
-      "<b>Merge Sort Mode</b><br>" +
-      "① 按 Divide，逐層拆分陣列。<br>" +
-      "② 按 Start Merge，從最底層開始合併。<br>" +
-      "③ 點擊或拖曳 L[i]、R[j] 到 arr[k]。<br>" +
-      "④ 填滿 arr 後，按 Next Merge。";
-  }
-
-  if (mode === "merge") {
-    renderMerge();
-  } else {
-    renderStandard();
-  }
-
-  document.getElementById("undoBtn").disabled =
-    history.length === 0;
-}
-
-function renderStandard() {
-  const storage = document.getElementById("storageArea");
-  storage.classList.toggle("visible", mode === "storage");
-
-  document.getElementById("keyCard").textContent = key ?? "—";
-
-  const board = document.getElementById("board");
-  board.replaceChildren();
-
-  arr.forEach((value, index) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.dataset.index = index;
-
-    if (value === null) card.classList.add("empty");
-    if (selected === index) card.classList.add("selected");
-
-    const number = document.createElement("strong");
-    number.textContent = value ?? "—";
-
-    const idx = document.createElement("small");
-    idx.textContent = "Index " + index;
-
-    card.append(number, idx);
-
-    card.onclick = () => {
-      if (suppressClick || value === null) return;
-
-      if (mode === "normal") {
-        if (selected === null) {
-          selected = index;
-          render();
-        } else {
-          swap(selected, index);
-        }
-      } else if (key === null) {
-        takeKey(index);
-      } else {
-        shiftRight(index);
-      }
-    };
-
-    if (mode === "normal") {
-      attachDrag(card, index, (from, to) => {
-        moveInsert(from, to);
-      });
-    }
-
-    board.append(card);
-  });
-
-  document.getElementById("status").textContent =
-    "操作次數：" + history.length +
-    (key !== null ? " ｜ Key = " + key +
-      " ｜ 空格 Index = " + emptyIndex : "");
-}
-
-function attachDrag(card, index, callback) {
-  card.addEventListener("pointerdown", e => {
-    if (e.button !== 0) return;
-
-    pointerDrag = {
-      id: e.pointerId,
-      from: index,
-      x: e.clientX,
-      y: e.clientY,
-      moved: false
-    };
-
-    card.setPointerCapture(e.pointerId);
-  });
-
-  card.addEventListener("pointermove", e => {
-    if (!pointerDrag || pointerDrag.id !== e.pointerId) return;
-
-    if (Math.hypot(
-      e.clientX - pointerDrag.x,
-      e.clientY - pointerDrag.y
-    ) > 8) {
-      pointerDrag.moved = true;
-      card.classList.add("dragging");
-    }
-  });
-
-  card.addEventListener("pointerup", e => {
-    if (!pointerDrag || pointerDrag.id !== e.pointerId) return;
-
-    const drag = pointerDrag;
-    pointerDrag = null;
-
-    if (!drag.moved) return;
-
-    const target = document
-      .elementFromPoint(e.clientX, e.clientY)
-      ?.closest(".card");
-
-    suppressClick = true;
-
-    if (target && target.parentElement === card.parentElement) {
-      callback(drag.from, Number(target.dataset.index));
-    } else {
-      render();
-    }
-
-    setTimeout(() => suppressClick = false, 0);
-  });
-
-  card.addEventListener("pointercancel", () => {
-    pointerDrag = null;
-    render();
-  });
-}
-
-function renderMerge() {
-  const tree = document.getElementById("mergeTree");
-  tree.replaceChildren(renderTreeNode(treeRoot));
-
-  const fullyDivided = divideDepth >= maxDepth(treeRoot);
-
-  document.getElementById("divideBtn").disabled =
-    fullyDivided || mergeStarted;
-
-  document.getElementById("startMergeBtn").disabled =
-    !fullyDivided || mergeStarted;
-
-  const nextBtn = document.getElementById("nextMergeBtn");
-  nextBtn.disabled =
-    !mergeStarted ||
-    !isTaskComplete() ||
-    taskIndex >= mergeTasks.length - 1;
-
-  const workspace = document.getElementById("mergeWorkspace");
-  workspace.classList.toggle("hidden", !mergeStarted);
-
-  if (!mergeStarted) {
-    document.getElementById("status").textContent =
-      fullyDivided
-        ? "Divide 完成！現在可以開始 Merge。"
-        : "目前拆分深度：" + divideDepth +
-          " / " + maxDepth(treeRoot);
+function setupMergeJob() {
+  if (mergeJobIndex >= mergeJobs.length) {
+    $("mergeWorkspace").classList.add("hidden");
+    $("nextMergeBtn").disabled = true;
+    renderMergeTree();
+    setStatus("mergeStatus",
+      `Merge Sort 完成！結果：[${mergeRoot.result.join(", ")}]`);
     return;
   }
 
-  const task = currentTask();
-  const L = task.left.result;
-  const R = task.right.result;
+  const node = mergeJobs[mergeJobIndex];
+  mergeState = {
+    node,
+    L:[...node.left.result],
+    R:[...node.right.result],
+    i:0, j:0, k:0,
+    output:[]
+  };
 
-  document.getElementById("mergeTitle").textContent =
-    "Merge " + (taskIndex + 1) + " / " +
-    mergeTasks.length +
-    " ｜ arr 長度：" + task.values.length;
+  $("mergeTitle").textContent =
+    `合併第 ${mergeJobIndex + 1} / ${mergeJobs.length} 組`;
 
-  document.getElementById("pointerInfo").innerHTML =
-    "<span>i = " + leftIndex + "</span>" +
-    "<span>j = " + rightIndex + "</span>" +
-    "<span>k = " + mergeOutput.length + "</span>";
-
-  renderSource("leftCards", L, leftIndex, "L");
-  renderSource("rightCards", R, rightIndex, "R");
-  renderTarget(task.values.length);
-
-  const complete = isTaskComplete();
-
-  document.getElementById("mergeHint").textContent =
-    complete
-      ? "這組 arr 已經填滿，可以按 Next Merge。"
-      : leftIndex === L.length
-        ? "L 已經用完，接下來將 R 剩餘元素放入 arr。"
-        : rightIndex === R.length
-          ? "R 已經用完，接下來將 L 剩餘元素放入 arr。"
-          : "比較 L[i] 與 R[j]，選擇要放入 arr[k] 的元素。";
-
-  const allDone =
-    complete && taskIndex === mergeTasks.length - 1;
-
-  document.getElementById("status").textContent =
-    allDone
-      ? "Merge Sort 完成！結果：" + task.result.join(", ")
-      : "目前正在處理第 " + (taskIndex + 1) +
-        " / " + mergeTasks.length + " 組合併";
+  renderMergeWorkspace();
 }
 
-function renderSource(containerId, values, usedCount, side) {
-  const container = document.getElementById(containerId);
-  container.replaceChildren();
+function chooseMergeElement(side) {
+  const s = mergeState;
+  if (!s) return;
 
-  values.forEach((value, index) => {
-    const card = document.createElement("div");
-    card.className = "merge-card";
-    card.textContent = value;
+  const arr = side === "L" ? s.L : s.R;
+  const index = side === "L" ? s.i : s.j;
 
-    if (index < usedCount) {
-      card.classList.add("used");
-    } else if (index === usedCount) {
-      card.classList.add("available");
+  if (index >= arr.length) return;
+
+  s.output.push(arr[index]);
+
+  if (side === "L") s.i++;
+  else s.j++;
+
+  s.k++;
+
+  renderMergeWorkspace();
+}
+
+function renderMergeWorkspace() {
+  const s = mergeState;
+  if (!s) return;
+
+  const left = $("mergeLeft");
+  const right = $("mergeRight");
+  const target = $("mergeTarget");
+
+  left.innerHTML = "";
+  right.innerHTML = "";
+  target.innerHTML = "";
+
+  function renderSource(arr, used, side, container) {
+    arr.forEach((value, index) => {
+      const available = index === used;
+      const el = tile(value, {
+        small:true,
+        selected:available,
+        click:available ? () => chooseMergeElement(side) : null,
+        drag:available ? `merge:${side}` : null
+      });
+
+      if (index < used) el.style.opacity = ".3";
+      container.appendChild(el);
+    });
+  }
+
+  renderSource(s.L, s.i, "L", left);
+  renderSource(s.R, s.j, "R", right);
+
+  for (let index = 0; index < s.L.length + s.R.length; index++) {
+    if (index < s.output.length) {
+      target.appendChild(tile(s.output[index], {small:true,done:true}));
     } else {
-      card.classList.add("waiting");
+      const el = tile("_", {small:true});
+      el.classList.add("placeholder");
+      target.appendChild(el);
+    }
+  }
+
+  $("mergePointers").innerHTML =
+    `<span class="pill">i = ${s.i}</span>
+     <span class="pill">j = ${s.j}</span>
+     <span class="pill">k = ${s.k}</span>`;
+
+  const complete = s.k === s.L.length + s.R.length;
+  $("nextMergeBtn").disabled = !complete;
+
+  if (complete) {
+    s.node.result = [...s.output];
+    setStatus("mergeStatus",
+      "這組合併完成！可以按 Next Merge。");
+  } else {
+    setStatus("mergeStatus",
+      "比較 L[i] 和 R[j]，選擇要放進 arr[k] 的元素。");
+  }
+
+  renderMergeTree();
+}
+
+$("mergeTarget").addEventListener("dragover", e => e.preventDefault());
+$("mergeTarget").addEventListener("drop", e => {
+  e.preventDefault();
+  const data = e.dataTransfer.getData("text/plain");
+  if (data === "merge:L") chooseMergeElement("L");
+  if (data === "merge:R") chooseMergeElement("R");
+});
+
+$("divideBtn").addEventListener("click", divideStep);
+$("startMergeBtn").addEventListener("click", startMerge);
+$("nextMergeBtn").addEventListener("click", () => {
+  if (!mergeState ||
+      mergeState.k !== mergeState.L.length + mergeState.R.length) return;
+
+  mergeJobIndex++;
+  setupMergeJob();
+});
+
+/* --------------------------------------------------
+   QUICK SORT SIMPLE — MANUAL DRAG AND DROP
+-------------------------------------------------- */
+
+let qsRoot;
+let qsJobs;
+let qsCurrent;
+let qsSelected;
+let qsCompleted;
+
+function makeQuickNode(values) {
+  return {
+    values:[...values],
+    pivot:null,
+    left:[],
+    right:[],
+    leftNode:null,
+    rightNode:null,
+    result:null,
+    done:false
+  };
+}
+
+function resetQuickSimple() {
+  qsRoot = makeQuickNode(initial);
+  qsJobs = [qsRoot];
+  qsCurrent = null;
+  qsSelected = null;
+  qsCompleted = [];
+
+  advanceQuickSimple();
+}
+
+function advanceQuickSimple() {
+  while (qsJobs.length) {
+    const node = qsJobs.pop();
+
+    if (node.values.length <= 1) {
+      node.result = [...node.values];
+      node.done = true;
+      continue;
     }
 
-    // 只有目前指標位置可以使用
-    if (index === usedCount) {
-      card.onclick = () => {
-        if (!suppressClick) chooseMergeElement(side);
-      };
+    qsCurrent = node;
+    qsCurrent.pivot = node.values[0];
+    qsCurrent.left = [];
+    qsCurrent.right = [];
+    qsSelected = null;
+    renderQuickSimple();
+    return;
+  }
 
-      card.addEventListener("pointerdown", e => {
-        if (e.button !== 0) return;
+  qsCurrent = null;
+  renderQuickSimple();
+}
 
-        pointerDrag = {
-          id: e.pointerId,
-          side,
-          x: e.clientX,
-          y: e.clientY,
-          moved: false
-        };
+function quickSimpleAssign(index, side) {
+  if (!qsCurrent) return;
 
-        card.setPointerCapture(e.pointerId);
-      });
+  const value = qsCurrent.values[index];
+  if (index === 0) return;
 
-      card.addEventListener("pointermove", e => {
-        if (!pointerDrag || pointerDrag.id !== e.pointerId) return;
+  if (qsCurrent.left.includes(index) ||
+      qsCurrent.right.includes(index)) return;
 
-        if (Math.hypot(
-          e.clientX - pointerDrag.x,
-          e.clientY - pointerDrag.y
-        ) > 8) {
-          pointerDrag.moved = true;
-          card.classList.add("dragging");
-        }
-      });
+  const smaller = numericValue(value) < numericValue(qsCurrent.pivot);
 
-      card.addEventListener("pointerup", e => {
-        if (!pointerDrag || pointerDrag.id !== e.pointerId) return;
+  if ((side === "left") !== smaller) {
+    setStatus("quickSimpleStatus",
+      `${value} 應該放在 ${smaller ? "Left" : "Right"}，請再試一次。`);
+    return;
+  }
 
-        const drag = pointerDrag;
-        pointerDrag = null;
+  qsCurrent[side].push(index);
+  qsSelected = null;
+  renderQuickSimple();
+}
 
-        if (!drag.moved) return;
+function renderQuickSimple() {
+  const current = $("quickSimpleCurrent");
+  const left = $("quickLeft");
+  const right = $("quickRight");
+  const results = $("quickSimpleResults");
 
-        const target = document
-          .elementFromPoint(e.clientX, e.clientY)
-          ?.closest(".merge-card.target.next");
+  current.innerHTML = "";
+  left.innerHTML = "";
+  right.innerHTML = "";
+  results.innerHTML = "";
 
-        suppressClick = true;
+  if (!qsCurrent) {
+    $("quickPivot").textContent = "完成";
+    $("quickSimpleNextBtn").disabled = true;
+    const sorted = [...initial].sort((a,b) =>
+      numericValue(a) - numericValue(b));
+    sorted.forEach(v => results.appendChild(tile(v,{done:true})));
+    setStatus("quickSimpleStatus",
+      `Quick Sort 完成！結果：[${sorted.join(", ")}]`);
+    return;
+  }
 
-        if (target) {
-          chooseMergeElement(drag.side);
-        } else {
-          render();
-        }
+  const node = qsCurrent;
+  $("quickPivot").textContent = node.pivot;
 
-        setTimeout(() => suppressClick = false, 0);
-      });
+  node.values.forEach((value,index) => {
+    if (index === 0) return;
+    if (node.left.includes(index) || node.right.includes(index)) return;
 
-      card.addEventListener("pointercancel", () => {
-        pointerDrag = null;
-        render();
-      });
-    }
+    current.appendChild(tile(value,{
+      selected:qsSelected === index,
+      drag:`quick:${index}`,
+      click:() => {
+        qsSelected = index;
+        renderQuickSimple();
+      }
+    }));
+  });
 
-    container.append(card);
+  node.left.forEach(index =>
+    left.appendChild(tile(node.values[index],{small:true})));
+
+  node.right.forEach(index =>
+    right.appendChild(tile(node.values[index],{small:true})));
+
+  const assigned = node.left.length + node.right.length;
+  const total = node.values.length - 1;
+  const complete = assigned === total;
+
+  $("quickSimpleNextBtn").disabled = !complete;
+
+  setStatus("quickSimpleStatus",
+    `Pivot = ${node.pivot}。已分配 ${assigned}/${total} 個元素。` +
+    (complete ? " 分區完成，可以進入下一步。" : ""));
+
+  qsCompleted.forEach((record,index) => {
+    const div = document.createElement("div");
+    div.className = "status";
+    div.textContent =
+      `Partition ${index+1}：` +
+      `[${record.left.join(", ")}] + ` +
+      `[${record.pivot}] + ` +
+      `[${record.right.join(", ")}]`;
+    results.appendChild(div);
   });
 }
 
-function renderTarget(length) {
-  const container = document.getElementById("targetCards");
-  container.replaceChildren();
+function finishQuickSimplePartition() {
+  const node = qsCurrent;
+  if (!node) return;
 
-  for (let index = 0; index < length; index++) {
-    const card = document.createElement("div");
-    card.className = "merge-card target";
+  if (node.left.length + node.right.length !==
+      node.values.length - 1) return;
 
-    if (index < mergeOutput.length) {
-      card.classList.add("filled");
-      card.textContent = mergeOutput[index];
-    } else {
-      card.textContent = "—";
+  const leftValues = node.left.map(i => node.values[i]);
+  const rightValues = node.right.map(i => node.values[i]);
 
-      if (index === mergeOutput.length) {
-        card.classList.add("next");
+  qsCompleted.push({
+    pivot:node.pivot,
+    left:leftValues,
+    right:rightValues
+  });
+
+  node.leftNode = makeQuickNode(leftValues);
+  node.rightNode = makeQuickNode(rightValues);
+  node.done = true;
+
+  // 先處理左邊，再處理右邊
+  qsJobs.push(node.rightNode);
+  qsJobs.push(node.leftNode);
+
+  advanceQuickSimple();
+}
+
+["quickLeftZone","quickRightZone"].forEach(id => {
+  const zone = $(id);
+  const side = zone.dataset.side;
+
+  zone.addEventListener("dragover", e => {
+    e.preventDefault();
+    zone.classList.add("over");
+  });
+
+  zone.addEventListener("dragleave", () =>
+    zone.classList.remove("over"));
+
+  zone.addEventListener("drop", e => {
+    e.preventDefault();
+    zone.classList.remove("over");
+
+    const data = e.dataTransfer.getData("text/plain");
+    if (!data.startsWith("quick:")) return;
+
+    quickSimpleAssign(Number(data.split(":")[1]),side);
+  });
+
+  zone.addEventListener("click", () => {
+    if (qsSelected !== null) quickSimpleAssign(qsSelected,side);
+  });
+});
+
+$("quickSimpleNextBtn").addEventListener(
+  "click",finishQuickSimplePartition);
+
+/* --------------------------------------------------
+   QUICK SORT IN-PLACE — AUTOMATIC TRACE
+-------------------------------------------------- */
+
+const quickCode = [
+  "def partition(array, start, end):",
+  "    pivot = array[start]",
+  "    low = start + 1",
+  "    high = end",
+  "    while True:",
+  "        while low <= high and array[high] >= pivot:",
+  "            high = high - 1",
+  "        while low <= high and array[low] <= pivot:",
+  "            low = low + 1",
+  "        if low <= high:",
+  "            array[low], array[high] = array[high], array[low]",
+  "        else:",
+  "            break",
+  "    array[start], array[high] = array[high], array[start]",
+  "    return high",
+  "",
+  "def quick_sort(array, start, end):",
+  "    if start >= end:",
+  "        return",
+  "    p = partition(array, start, end)",
+  "    quick_sort(array, start, p-1)",
+  "    quick_sort(array, p+1, end)"
+];
+
+let autoFrames = [];
+let autoIndex = 0;
+let autoTimer = null;
+
+function buildAutoFrames(values) {
+  const arr = [...values];
+  const frames = [];
+
+  function record(message,line,info = {}) {
+    frames.push({
+      arr:[...arr],
+      message,
+      line,
+      start:info.start ?? null,
+      end:info.end ?? null,
+      pivotIndex:info.pivotIndex ?? null,
+      pivot:info.pivot ?? null,
+      low:info.low ?? null,
+      high:info.high ?? null
+    });
+  }
+
+  function partition(start,end) {
+    const pivot = numericValue(arr[start]);
+    let low = start + 1;
+    let high = end;
+
+    const state = () => ({
+      start,end,pivotIndex:start,pivot,low,high
+    });
+
+    record(
+      `開始 Partition：區間 ${start}～${end}，Pivot = ${arr[start]}。`,
+      1,state());
+
+    record("low 從 Pivot 右邊開始。",2,state());
+    record("high 從目前區間最右邊開始。",3,state());
+
+    while (true) {
+      record("先從右往左搜尋。",5,state());
+
+      while (low <= high && numericValue(arr[high]) >= pivot) {
+        record(
+          `${arr[high]} >= ${pivot}，在右邊是正確的，high 左移。`,
+          6,state());
+        high--;
+        record(`high 移到 index ${high}。`,6,state());
+      }
+
+      if (low <= high) {
+        record(
+          `${arr[high]} < ${pivot}，high 停下來，等待交換。`,
+          5,state());
+      }
+
+      record("接著從左往右搜尋。",7,state());
+
+      while (low <= high && numericValue(arr[low]) <= pivot) {
+        record(
+          `${arr[low]} <= ${pivot}，在左邊是正確的，low 右移。`,
+          8,state());
+        low++;
+        record(`low 移到 index ${low}。`,8,state());
+      }
+
+      if (low <= high) {
+        record(
+          `${arr[low]} > ${pivot}，low 停下來，等待交換。`,
+          7,state());
+      }
+
+      if (low <= high) {
+        const a = arr[low];
+        const b = arr[high];
+
+        record(`準備交換 ${a} 和 ${b}。`,9,state());
+        [arr[low],arr[high]] = [arr[high],arr[low]];
+        record(`交換完成：${a} 和 ${b} 回到正確的左右區域。`,
+          10,state());
+      } else {
+        record(
+          `low = ${low}，high = ${high}，指標交錯，結束掃描。`,
+          12,state());
+        break;
       }
     }
 
-    container.append(card);
+    const originalPivot = arr[start];
+    const target = arr[high];
+
+    [arr[start],arr[high]] = [arr[high],arr[start]];
+
+    record(
+      `Pivot 歸位：交換 ${originalPivot} 和 ${target}。` +
+      ` Pivot 最終位置是 index ${high}。`,
+      13,{...state(),pivotIndex:high});
+
+    record(`Partition 回傳 p = ${high}。`,
+      14,{...state(),pivotIndex:high});
+
+    return high;
   }
+
+  function sort(start,end) {
+    record(`呼叫 quick_sort(array, ${start}, ${end})。`,
+      16,{start,end});
+
+    if (start >= end) {
+      record(`區間 ${start}～${end} 不需要再排序，return。`,
+        18,{start,end});
+      return;
+    }
+
+    record(`開始處理區間 ${start}～${end}。`,
+      19,{start,end});
+
+    const p = partition(start,end);
+
+    record(`Pivot 位於 index ${p}，接著排序左邊。`,
+      20,{start,end,pivotIndex:p});
+
+    sort(start,p-1);
+
+    record(`左邊完成，接著排序右邊。`,
+      21,{start,end,pivotIndex:p});
+
+    sort(p+1,end);
+  }
+
+  record("初始陣列，準備開始 Quick Sort。",16);
+  sort(0,arr.length-1);
+  record(`全部排序完成：[${arr.join(", ")}]`,null);
+
+  return frames;
 }
 
-function undo() {
-  if (!history.length) return;
-
-  restoreState(history.pop());
-  render();
+function stopAuto() {
+  if (autoTimer !== null) clearInterval(autoTimer);
+  autoTimer = null;
 }
 
-reset();
+function renderAuto() {
+  const frame = autoFrames[autoIndex];
+  if (!frame) return;
+
+  const box = $("autoArray");
+  box.innerHTML = "";
+
+  frame.arr.forEach((value,index) => {
+    const el = tile(value,{
+      pivot:index === frame.pivotIndex,
+      low:index === frame.low,
+      high:index === frame.high
+    });
+    box.appendChild(el);
+  });
+
+  const fields = [
+    ["Step",`${autoIndex+1}/${autoFrames.length}`],
+    ["Pivot",frame.pivot ?? "—"],
+    ["low",frame.low ?? "—"],
+    ["high",frame.high ?? "—"],
+    ["start",frame.start ?? "—"],
+    ["end",frame.end ?? "—"]
+  ];
+
+  $("autoPointers").innerHTML = fields.map(([name,value]) =>
+    `<span class="pill">${name} = ${value}</span>`).join("");
+
+  $("autoCode").innerHTML = "";
+  quickCode.forEach((line,index) => {
+    const el = document.createElement("span");
+    el.className = "code-line" +
+      (index === frame.line ? " active" : "");
+    el.textContent = line || " ";
+    $("autoCode").appendChild(el);
+  });
+
+  setStatus("autoStatus",frame.message);
+
+  $("autoPrevBtn").disabled = autoIndex === 0;
+  $("autoNextBtn").disabled = autoIndex === autoFrames.length-1;
+}
+
+function autoNext() {
+  if (autoIndex >= autoFrames.length - 1) {
+    stopAuto();
+    return;
+  }
+  autoIndex++;
+  renderAuto();
+  if (autoIndex === autoFrames.length - 1) stopAuto();
+}
+
+function autoPrevious() {
+  stopAuto();
+  if (autoIndex > 0) autoIndex--;
+  renderAuto();
+}
+
+function playAuto() {
+  stopAuto();
+
+  if (autoIndex >= autoFrames.length - 1) {
+    autoIndex = 0;
+    renderAuto();
+  }
+
+  const speed = Number($("autoSpeed").value);
+  autoTimer = setInterval(autoNext,speed);
+}
+
+$("autoPlayBtn").addEventListener("click",playAuto);
+$("autoPauseBtn").addEventListener("click",stopAuto);
+$("autoNextBtn").addEventListener("click",() => {
+  stopAuto();
+  autoNext();
+});
+$("autoPrevBtn").addEventListener("click",autoPrevious);
+$("autoSpeed").addEventListener("change",() => {
+  if (autoTimer !== null) playAuto();
+});
+
+/* --------------------------------------------------
+   INITIALIZATION
+-------------------------------------------------- */
+
+function resetAll() {
+  const values = parseNumbers();
+  if (!values) return;
+
+  stopAuto();
+
+  initial = [...values];
+  normal = [...values];
+  selectedNormal = null;
+
+  storage = [...values];
+  key = null;
+  hole = -1;
+  history = [];
+
+  renderNormal();
+  renderStorage();
+
+  // Merge Sort
+  mergeRoot = makeMergeNode(initial);
+  mergeLevels = collectMergeLevels(mergeRoot);
+  mergeDepth = 0;
+  mergeJobs = collectMergeJobs(mergeRoot);
+  mergeJobIndex = 0;
+  mergeState = null;
+  mergeStarted = false;
+
+  $("divideBtn").disabled = false;
+  $("startMergeBtn").disabled = true;
+  $("nextMergeBtn").disabled = true;
+  $("mergeWorkspace").classList.add("hidden");
+
+  renderMergeTree();
+  setStatus("mergeStatus","按 Divide 開始逐層拆分。");
+
+  // Quick Sort simple
+  resetQuickSimple();
+
+  // Quick Sort in-place
+  autoFrames = buildAutoFrames(initial);
+  autoIndex = 0;
+  renderAuto();
+}
+
+resetAll();
 </script>
 </body>
 </html>
