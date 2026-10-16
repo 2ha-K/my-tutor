@@ -1,226 +1,436 @@
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>手動排序練習</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorting Practice</title>
 <style>
-  :root {
-    font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
-    color: #171717;
-    background: #fafafa;
-  }
   * { box-sizing: border-box; }
-  body { margin: 0; padding: 24px; }
-  .panel {
-    max-width: 850px;
+
+  body {
+    font-family: system-ui, "Noto Sans TC", sans-serif;
+    background: #f7f8fa;
+    color: #222;
+    padding: 24px;
+    margin: 0;
+  }
+
+  .container {
+    max-width: 900px;
     margin: auto;
     background: white;
     border: 1px solid #ddd;
-    border-radius: 14px;
-    padding: 18px;
+    border-radius: 16px;
+    padding: 24px;
   }
-  .top, .controls, .bottom {
+
+  h2 { margin-top: 0; }
+
+  .mode-bar, .input-row, .actions {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
   }
-  .top { margin-bottom: 16px; }
-  .tag {
-    background: #f4f4f4;
-    border-radius: 8px;
-    padding: 5px 10px;
-    font-size: 13px;
-  }
-  .controls { margin-bottom: 12px; }
-  input {
-    width: 100%;
-    min-width: 0;
-    border: 1px solid #ccc;
-    border-radius: 24px;
-    padding: 10px 14px;
-    font: inherit;
-  }
+
   button {
-    border: 1px solid #ddd;
-    border-radius: 24px;
+    padding: 10px 16px;
+    border: 1px solid #d4d4d8;
+    border-radius: 9px;
     background: white;
-    padding: 9px 16px;
     cursor: pointer;
-    font: inherit;
+    font-size: 14px;
   }
-  button.primary {
-    background: #171717;
+
+  button.active, button.primary {
+    background: #2563eb;
     color: white;
-    border-color: #171717;
+    border-color: #2563eb;
   }
-  button:disabled { opacity: .4; cursor: not-allowed; }
-  .cards {
+
+  button:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+  }
+
+  input {
+    flex: 1;
+    min-width: 180px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 9px;
+    font-size: 15px;
+  }
+
+  .board {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 5px;
+    gap: 10px;
+    margin: 20px 0;
   }
+
   .card {
-    border: 1px solid #ddd;
-    border-radius: 9px;
-    min-height: 105px;
+    min-height: 110px;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    background: #fafafa;
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
-    gap: 13px;
-    background: #fcfcfc;
-    cursor: grab;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
     user-select: none;
     touch-action: none;
   }
-  .card strong { font-size: 22px; }
-  .card small { color: #666; }
+
+  .card strong { font-size: 26px; }
+  .card small { color: #777; }
+
   .card.selected {
-    border: 2px solid #3478d4;
-    background: #eef5ff;
+    border-color: #2563eb;
+    background: #eff6ff;
   }
-  .card.dragging { opacity: .45; cursor: grabbing; }
+
+  .card.dragging { opacity: .35; }
+
   .card.over {
-    border: 2px dashed #3478d4;
-    background: #eef5ff;
+    border-color: #2563eb;
+    background: #dbeafe;
   }
-  .hint { font-size: 13px; color: #666; margin: 12px 0; }
-  .bottom { font-size: 13px; color: #666; flex-wrap: wrap; }
-  .actions { display: flex; gap: 8px; }
-  .error {
-    color: #b42318;
-    font-size: 13px;
-    min-height: 18px;
-    margin-top: 6px;
+
+  .card.empty {
+    border: 2px dashed #2563eb;
+    background: #eff6ff;
+    color: #2563eb;
+    cursor: default;
   }
-  @media (max-width: 520px) {
+
+  .card.movable {
+    border-color: #f59e0b;
+    background: #fffbeb;
+  }
+
+  .storage {
+    display: none;
+    border: 2px dashed #aaa;
+    border-radius: 12px;
+    padding: 18px;
+    margin: 18px 0;
+    background: #fafafa;
+  }
+
+  .storage.visible { display: block; }
+
+  .storage-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .key-card {
+    width: 100px;
+    height: 85px;
+    border: 2px solid #8b5cf6;
+    background: #f5f3ff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: bold;
+  }
+
+  .key-card.empty-key {
+    border-style: dashed;
+    color: #999;
+    font-size: 14px;
+    font-weight: normal;
+  }
+
+  .info {
+    padding: 12px;
+    background: #f4f4f5;
+    border-radius: 9px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .status {
+    margin-top: 16px;
+    font-size: 14px;
+    color: #555;
+  }
+
+  .error { color: #b91c1c; }
+
+  @media (max-width: 550px) {
     body { padding: 10px; }
-    .panel { padding: 12px; }
-    .card { min-height: 80px; }
-    .card strong { font-size: 18px; }
-    button { padding: 8px 12px; }
+    .container { padding: 14px; }
+    .board { gap: 5px; }
+    .card { min-height: 85px; }
+    .card strong { font-size: 20px; }
+    .key-card { width: 80px; }
   }
 </style>
 </head>
+
 <body>
-<main class="panel">
-  <div class="top">
-    <strong>手動排序練習</strong>
-    <span class="tag">點擊交換 / 拖曳插入</span>
+<div class="container">
+  <h2>Sorting Practice</h2>
+
+  <div class="mode-bar">
+    <button id="normalBtn" class="active" onclick="changeMode('normal')">
+      Normal Mode
+    </button>
+    <button id="storageBtn" onclick="changeMode('storage')">
+      Insertion Storage Mode
+    </button>
   </div>
 
-  <div class="controls">
-    <input id="numbers" aria-label="輸入五個數字"
-           value="5A, 5B, 3, 1, 2">
-    <button class="primary" id="create">建立</button>
+  <div class="input-row">
+    <input id="numberInput" value="5A, 5B, 3, 1, 2">
+    <button class="primary" onclick="createCards()">建立卡片</button>
   </div>
 
-  <div class="cards" id="cards"></div>
+  <div id="instructions" class="info"></div>
 
-  <p class="hint">
-    點擊兩張卡片：互相交換（Swap）。<br>
-    拖曳卡片到另一個位置：插入（Insert），
-    中間的卡片會自動移動。<br>
-    可以使用 5A、5B 等標記觀察排序穩定性。
-    A、B 只是識別標籤，不影響數值大小。
-  </p>
-
-  <div class="bottom">
-    <span id="count">操作次數：0</span>
-    <div class="actions">
-      <button id="undo">↶ 上一步</button>
-      <button id="reset">⟳ 重設</button>
+  <div id="storageArea" class="storage">
+    <strong>Key Storage（暫存區）</strong>
+    <p style="font-size:13px;color:#666">
+      模擬 Python 的 key = arr[i]
+    </p>
+    <div class="storage-content">
+      <div id="keyCard" class="key-card empty-key">尚未取出</div>
+      <button id="insertBtn" class="primary"
+              onclick="insertKey()" disabled>
+        插入 Key
+      </button>
     </div>
   </div>
-  <div class="error" id="error" role="status"></div>
-</main>
+
+  <div id="board" class="board"></div>
+
+  <div class="actions">
+    <button id="undoBtn" onclick="undo()">↶ 上一步</button>
+    <button onclick="reset()">⟳ 重設</button>
+  </div>
+
+  <div id="status" class="status"></div>
+</div>
 
 <script>
-const initial = ["5A", "5B", "3", "1", "2"];
+let initial = ["5A", "5B", "3", "1", "2"];
+let arr = [...initial];
 
-let nums = [...initial];
-let history = [];
+let mode = "normal";
 let selected = null;
-let pointerDrag = null;
+let key = null;
+let emptyIndex = null;
+let history = [];
+
+let dragState = null;
 let suppressClick = false;
 
-const cards = document.getElementById("cards");
-const count = document.getElementById("count");
-const undo = document.getElementById("undo");
-const error = document.getElementById("error");
+// 儲存操作前的狀態
+function saveHistory() {
+  history.push({
+    arr: [...arr],
+    key: key,
+    emptyIndex: emptyIndex,
+    selected: selected
+  });
+}
 
-// 點擊兩張卡片：交換位置
-function swap(a, b) {
+// 切換模式
+function changeMode(newMode) {
+  // 切換時保留目前完整排序結果
+  // 如果正在暫存 key，先取消該輪
+  if (key !== null) {
+    while (history.length && key !== null) {
+      const previous = history.pop();
+      restoreState(previous);
+    }
+  }
+
+  mode = newMode;
   selected = null;
+  history = [];
+  render();
+}
 
+// Normal Mode：交換
+function swap(a, b) {
   if (a === b) {
+    selected = null;
     render();
     return;
   }
 
-  history.push([...nums]);
+  saveHistory();
 
-  [nums[a], nums[b]] = [nums[b], nums[a]];
+  [arr[a], arr[b]] = [arr[b], arr[a]];
 
+  selected = null;
   render();
 }
 
-// 拖曳卡片：插入新位置
-function insert(from, to) {
-  selected = null;
-
+// Normal Mode：拖曳插入
+function moveInsert(from, to) {
   if (from === to) {
     render();
     return;
   }
 
-  history.push([...nums]);
+  saveHistory();
 
-  // 先取出拖曳的元素
-  const [item] = nums.splice(from, 1);
+  const [item] = arr.splice(from, 1);
+  arr.splice(to, 0, item);
 
-  // 插入目標位置，其餘元素自動位移
-  nums.splice(to, 0, item);
+  selected = null;
+  render();
+}
+
+// Storage Mode：取出 key
+function takeKey(index) {
+  if (key !== null) return;
+
+  saveHistory();
+
+  key = arr[index];
+  arr[index] = null;
+  emptyIndex = index;
 
   render();
 }
 
+// Storage Mode：將左邊元素往右移一格
+function shiftRight(index) {
+  if (key === null || emptyIndex === null) return;
+
+  // 只能移動空格正左邊的元素
+  if (index !== emptyIndex - 1) return;
+
+  saveHistory();
+
+  arr[emptyIndex] = arr[index];
+  arr[index] = null;
+  emptyIndex = index;
+
+  render();
+}
+
+// Storage Mode：把 key 放回空格
+function insertKey() {
+  if (key === null || emptyIndex === null) return;
+
+  saveHistory();
+
+  arr[emptyIndex] = key;
+  key = null;
+  emptyIndex = null;
+
+  render();
+}
+
+function handleCardClick(index) {
+  if (mode === "normal") {
+    if (selected === null) {
+      selected = index;
+      render();
+    } else {
+      swap(selected, index);
+    }
+    return;
+  }
+
+  // Storage Mode
+  if (key === null) {
+    takeKey(index);
+  } else {
+    shiftRight(index);
+  }
+}
+
 function render() {
-  cards.replaceChildren();
+  document.getElementById("normalBtn").classList.toggle(
+    "active", mode === "normal"
+  );
+  document.getElementById("storageBtn").classList.toggle(
+    "active", mode === "storage"
+  );
 
-  nums.forEach((value, i) => {
+  const instructions = document.getElementById("instructions");
+  const storageArea = document.getElementById("storageArea");
+
+  if (mode === "normal") {
+    instructions.innerHTML = `
+      <strong>Normal Mode</strong><br>
+      點擊兩張卡片：Swap（交換）。<br>
+      拖曳卡片到另一個位置：Insert（插入）。
+    `;
+    storageArea.classList.remove("visible");
+  } else {
+    instructions.innerHTML = `
+      <strong>Insertion Storage Mode</strong><br>
+      ① 點擊卡片，把它取出成為 key。<br>
+      ② 點擊虛線空格左邊的卡片，讓它往右移。<br>
+      ③ 重複移動，直到找到正確位置。<br>
+      ④ 按「插入 Key」，把 key 放進空格。
+    `;
+    storageArea.classList.add("visible");
+  }
+
+  const keyCard = document.getElementById("keyCard");
+  keyCard.textContent = key === null ? "尚未取出" : key;
+  keyCard.classList.toggle("empty-key", key === null);
+
+  document.getElementById("insertBtn").disabled = key === null;
+
+  const board = document.getElementById("board");
+  board.replaceChildren();
+
+  arr.forEach((value, index) => {
     const card = document.createElement("div");
-
-    card.className = "card" + (selected === i ? " selected" : "");
-    card.dataset.index = i;
+    card.className = "card";
+    card.dataset.index = index;
     card.tabIndex = 0;
     card.setAttribute("role", "button");
-    card.setAttribute("aria-label", `位置 ${i}，數字 ${value}`);
 
-    const num = document.createElement("strong");
-    num.textContent = value;
+    if (value === null) {
+      card.classList.add("empty");
+      const label = document.createElement("strong");
+      label.textContent = "空格";
+      card.append(label);
+    } else {
+      const label = document.createElement("strong");
+      label.textContent = value;
+      card.append(label);
+    }
 
-    const idx = document.createElement("small");
-    idx.textContent = i;
+    const indexLabel = document.createElement("small");
+    indexLabel.textContent = "Index " + index;
+    card.append(indexLabel);
 
-    card.append(num, idx);
+    if (mode === "normal" && selected === index) {
+      card.classList.add("selected");
+    }
 
-    // 點擊：選擇兩張卡片進行交換
+    if (mode === "storage" &&
+        key !== null &&
+        index === emptyIndex - 1) {
+      card.classList.add("movable");
+    }
+
     card.addEventListener("click", () => {
       if (suppressClick) return;
-
-      if (selected === null) {
-        selected = i;
-        render();
-      } else {
-        swap(selected, i);
-      }
+      if (value === null) return;
+      handleCardClick(index);
     });
 
-    // 鍵盤操作：Enter 或 Space
     card.addEventListener("keydown", e => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -228,33 +438,35 @@ function render() {
       }
     });
 
-    // 開始拖曳
-    card.addEventListener("pointerdown", e => {
-      if (e.button !== 0) return;
+    // 只有 Normal Mode 支援拖曳插入
+    if (mode === "normal") {
+      card.addEventListener("pointerdown", e => {
+        if (e.button !== 0) return;
 
-      pointerDrag = {
-        id: e.pointerId,
-        source: i,
-        x: e.clientX,
-        y: e.clientY,
-        moved: false
-      };
+        dragState = {
+          pointerId: e.pointerId,
+          from: index,
+          x: e.clientX,
+          y: e.clientY,
+          moved: false
+        };
 
-      card.setPointerCapture(e.pointerId);
-    });
+        card.setPointerCapture(e.pointerId);
+      });
 
-    // 拖曳過程：顯示目標位置
-    card.addEventListener("pointermove", e => {
-      if (!pointerDrag || pointerDrag.id !== e.pointerId) return;
+      card.addEventListener("pointermove", e => {
+        if (!dragState ||
+            dragState.pointerId !== e.pointerId) return;
 
-      if (Math.hypot(
-        e.clientX - pointerDrag.x,
-        e.clientY - pointerDrag.y
-      ) > 8) {
-        pointerDrag.moved = true;
-      }
+        if (Math.hypot(
+          e.clientX - dragState.x,
+          e.clientY - dragState.y
+        ) > 8) {
+          dragState.moved = true;
+        }
 
-      if (pointerDrag.moved) {
+        if (!dragState.moved) return;
+
         card.classList.add("dragging");
 
         document.querySelectorAll(".card.over").forEach(c => {
@@ -265,28 +477,28 @@ function render() {
           .elementFromPoint(e.clientX, e.clientY)
           ?.closest(".card");
 
-        if (target && target !== card && cards.contains(target)) {
+        if (target && board.contains(target)) {
           target.classList.add("over");
         }
-      }
-    });
+      });
 
-    // 放開滑鼠：執行插入，而不是交換
-    card.addEventListener("pointerup", e => {
-      if (!pointerDrag || pointerDrag.id !== e.pointerId) return;
+      card.addEventListener("pointerup", e => {
+        if (!dragState ||
+            dragState.pointerId !== e.pointerId) return;
 
-      const drag = pointerDrag;
-      pointerDrag = null;
+        const drag = dragState;
+        dragState = null;
 
-      if (drag.moved) {
+        if (!drag.moved) return;
+
         const target = document
           .elementFromPoint(e.clientX, e.clientY)
           ?.closest(".card");
 
         suppressClick = true;
 
-        if (target && cards.contains(target)) {
-          insert(drag.source, Number(target.dataset.index));
+        if (target && board.contains(target)) {
+          moveInsert(drag.from, Number(target.dataset.index));
         } else {
           render();
         }
@@ -294,67 +506,78 @@ function render() {
         setTimeout(() => {
           suppressClick = false;
         }, 0);
-      }
-    });
+      });
 
-    card.addEventListener("pointercancel", () => {
-      pointerDrag = null;
-      render();
-    });
+      card.addEventListener("pointercancel", () => {
+        dragState = null;
+        render();
+      });
+    }
 
-    cards.append(card);
+    board.append(card);
   });
 
-  count.textContent = `操作次數：${history.length}`;
-  undo.disabled = history.length === 0;
+  document.getElementById("undoBtn").disabled =
+    history.length === 0;
+
+  let message = `操作次數：${history.length}`;
+
+  if (mode === "storage" && key !== null) {
+    message += ` ｜ Key = ${key} ｜ 空格位置 = ${emptyIndex}`;
+
+    if (emptyIndex > 0) {
+      message += ` ｜ 可將 Index ${emptyIndex - 1} 往右移`;
+    }
+  }
+
+  document.getElementById("status").textContent = message;
 }
 
-// 建立新的五張卡片
-document.getElementById("create").onclick = () => {
-  const parts = document
-    .getElementById("numbers")
-    .value.split(",")
-    .map(s => s.trim());
+function restoreState(state) {
+  arr = [...state.arr];
+  key = state.key;
+  emptyIndex = state.emptyIndex;
+  selected = state.selected;
+}
 
-  const valid = parts.every(s =>
-    /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)[A-Za-z]*$/.test(s)
-  );
+function undo() {
+  if (!history.length) return;
 
-  if (parts.length !== 5 || !valid) {
-    error.textContent =
-      "請輸入五個數字（可加英文字母標記），例如：5A, 5B, 3, 1, 2";
+  restoreState(history.pop());
+  render();
+}
+
+function reset() {
+  arr = [...initial];
+  key = null;
+  emptyIndex = null;
+  selected = null;
+  history = [];
+  render();
+}
+
+function createCards() {
+  const input = document.getElementById("numberInput").value;
+
+  const values = input.split(",").map(v => v.trim());
+
+  const valid = values.length === 5 &&
+    values.every(v =>
+      /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)[A-Za-z]*$/.test(v)
+    );
+
+  if (!valid) {
+    document.getElementById("status").textContent =
+      "請輸入五個數字，例如：5A, 5B, 3, 1, 2";
+    document.getElementById("status").classList.add("error");
     return;
   }
 
-  error.textContent = "";
-  nums = parts;
-  history = [];
-  selected = null;
+  document.getElementById("status").classList.remove("error");
 
-  render();
-};
-
-// 回到上一步
-undo.onclick = () => {
-  if (!history.length) return;
-
-  nums = history.pop();
-  selected = null;
-
-  render();
-};
-
-// 重設為原始數字
-document.getElementById("reset").onclick = () => {
-  nums = [...initial];
-  history = [];
-  selected = null;
-
-  document.getElementById("numbers").value = initial.join(", ");
-  error.textContent = "";
-
-  render();
-};
+  initial = [...values];
+  reset();
+}
 
 render();
 </script>
