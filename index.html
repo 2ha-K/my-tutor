@@ -1,26 +1,362 @@
+
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>手動排序練習</title>
 <style>
-:root{font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;color:#171717;background:#fafafa}*{box-sizing:border-box}body{margin:0;padding:24px}.panel{max-width:850px;margin:auto;background:#fff;border:1px solid #ddd;border-radius:14px;padding:18px}.top,.controls,.bottom{display:flex;justify-content:space-between;align-items:center;gap:12px}.top{margin-bottom:16px}.tag{background:#f4f4f4;border-radius:8px;padding:5px 10px;font-size:13px}.controls{margin-bottom:12px}input{width:100%;border:1px solid #ccc;border-radius:24px;padding:10px 14px;font:inherit;min-width:0}button{border:1px solid #ddd;border-radius:24px;background:white;padding:9px 16px;cursor:pointer;font:inherit}button.primary{background:#171717;color:white;border-color:#171717}button:disabled{opacity:.4;cursor:not-allowed}.cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}.card{border:1px solid #ddd;border-radius:9px;min-height:105px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;background:#fcfcfc;cursor:grab;user-select:none;touch-action:none}.card strong{font-size:22px}.card small{color:#666}.card.selected{border:2px solid #3478d4;background:#eef5ff}.card.dragging{opacity:.45}.card.over{border:2px dashed #3478d4;background:#eef5ff}.hint{font-size:13px;color:#666;margin:12px 0}.bottom{font-size:13px;color:#666;flex-wrap:wrap}.actions{display:flex;gap:8px}.error{color:#b42318;font-size:13px;min-height:18px;margin-top:6px}@media(max-width:520px){body{padding:10px}.panel{padding:12px}.card{min-height:80px}.card strong{font-size:18px}button{padding:8px 12px}}
+  :root {
+    font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
+    color: #171717;
+    background: #fafafa;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; }
+  .panel {
+    max-width: 850px;
+    margin: auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    padding: 18px;
+  }
+  .top, .controls, .bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .top { margin-bottom: 16px; }
+  .tag {
+    background: #f4f4f4;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 13px;
+  }
+  .controls { margin-bottom: 12px; }
+  input {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid #ccc;
+    border-radius: 24px;
+    padding: 10px 14px;
+    font: inherit;
+  }
+  button {
+    border: 1px solid #ddd;
+    border-radius: 24px;
+    background: white;
+    padding: 9px 16px;
+    cursor: pointer;
+    font: inherit;
+  }
+  button.primary {
+    background: #171717;
+    color: white;
+    border-color: #171717;
+  }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 5px;
+  }
+  .card {
+    border: 1px solid #ddd;
+    border-radius: 9px;
+    min-height: 105px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 13px;
+    background: #fcfcfc;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+  }
+  .card strong { font-size: 22px; }
+  .card small { color: #666; }
+  .card.selected {
+    border: 2px solid #3478d4;
+    background: #eef5ff;
+  }
+  .card.dragging { opacity: .45; cursor: grabbing; }
+  .card.over {
+    border: 2px dashed #3478d4;
+    background: #eef5ff;
+  }
+  .hint { font-size: 13px; color: #666; margin: 12px 0; }
+  .bottom { font-size: 13px; color: #666; flex-wrap: wrap; }
+  .actions { display: flex; gap: 8px; }
+  .error {
+    color: #b42318;
+    font-size: 13px;
+    min-height: 18px;
+    margin-top: 6px;
+  }
+  @media (max-width: 520px) {
+    body { padding: 10px; }
+    .panel { padding: 12px; }
+    .card { min-height: 80px; }
+    .card strong { font-size: 18px; }
+    button { padding: 8px 12px; }
+  }
 </style>
 </head>
-<body><main class="panel">
-<div class="top"><strong>手動排序練習</strong><span class="tag">自由交換</span></div>
-<div class="controls"><input id="numbers" aria-label="輸入五個數字" value="5A, 5B, 3, 1, 2"><button class="primary" id="create">建立</button></div>
-<div class="cards" id="cards"></div>
-<p class="hint">可以輸入 5A、5B 這類標記，觀察相同數值的先後順序是否改變。拖曳或點選兩張卡片即可交換；排序比較時只看數字，A／B 是識別標籤。</p>
-<div class="bottom"><span id="count">交換次數：0</span><div class="actions"><button id="undo">↶ 上一步</button><button id="reset">⟳ 重設</button></div></div><div class="error" id="error" role="status"></div>
+<body>
+<main class="panel">
+  <div class="top">
+    <strong>手動排序練習</strong>
+    <span class="tag">點擊交換 / 拖曳插入</span>
+  </div>
+
+  <div class="controls">
+    <input id="numbers" aria-label="輸入五個數字"
+           value="5A, 5B, 3, 1, 2">
+    <button class="primary" id="create">建立</button>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <p class="hint">
+    點擊兩張卡片：互相交換（Swap）。<br>
+    拖曳卡片到另一個位置：插入（Insert），
+    中間的卡片會自動移動。<br>
+    可以使用 5A、5B 等標記觀察排序穩定性。
+    A、B 只是識別標籤，不影響數值大小。
+  </p>
+
+  <div class="bottom">
+    <span id="count">操作次數：0</span>
+    <div class="actions">
+      <button id="undo">↶ 上一步</button>
+      <button id="reset">⟳ 重設</button>
+    </div>
+  </div>
+  <div class="error" id="error" role="status"></div>
 </main>
+
 <script>
-const initial=["5A","5B","3","1","2"];let nums=[...initial],history=[],selected=null,dragSource=null,pointerDrag=null;
-const cards=document.getElementById('cards'),count=document.getElementById('count'),undo=document.getElementById('undo'),error=document.getElementById('error');
-function swap(a,b){selected=null;if(a===b){render();return}history.push([...nums]);[nums[a],nums[b]]=[nums[b],nums[a]];render()}
-function render(){cards.replaceChildren();nums.forEach((value,i)=>{const card=document.createElement('div');card.className='card'+(selected===i?' selected':'');card.dataset.index=i;card.tabIndex=0;card.setAttribute('role','button');card.setAttribute('aria-label',`位置 ${i}，數字 ${value}`);const num=document.createElement('strong');num.textContent=value;const idx=document.createElement('small');idx.textContent=i;card.append(num,idx);card.addEventListener('click',()=>{if(suppressClick){suppressClick=false;return}if(selected===null){selected=i;render()}else swap(selected,i)});card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();card.click()}});card.addEventListener('pointerdown',e=>{if(e.button!==0)return;pointerDrag={id:e.pointerId,source:i,x:e.clientX,y:e.clientY,moved:false};card.setPointerCapture(e.pointerId)});card.addEventListener('pointermove',e=>{if(!pointerDrag||pointerDrag.id!==e.pointerId)return;if(Math.hypot(e.clientX-pointerDrag.x,e.clientY-pointerDrag.y)>8)pointerDrag.moved=true;if(pointerDrag.moved){card.classList.add('dragging');document.querySelectorAll('.card.over').forEach(c=>c.classList.remove('over'));const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('.card');if(target&&target!==card)target.classList.add('over')}});card.addEventListener('pointerup',e=>{if(!pointerDrag||pointerDrag.id!==e.pointerId)return;const d=pointerDrag;pointerDrag=null;if(d.moved){const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('.card');suppressClick=true;if(target)swap(d.source,Number(target.dataset.index));else render();setTimeout(()=>suppressClick=false,0)}});card.addEventListener('pointercancel',()=>{pointerDrag=null;render()});cards.append(card)});count.textContent=`交換次數：${history.length}`;undo.disabled=history.length===0}
-let suppressClick=false;
-document.getElementById('create').onclick=()=>{const parts=document.getElementById('numbers').value.split(',').map(s=>s.trim());const valid=parts.every(s=>/^[+-]?(?:\d+(?:\.\d+)?|\.\d+)[A-Za-z]*$/.test(s));if(parts.length!==5||!valid){error.textContent='請輸入五個數字（可加英文字母標記），例如：5A, 5B, 3, 1, 2';return}error.textContent='';nums=parts;history=[];selected=null;render()};
-undo.onclick=()=>{if(!history.length)return;nums=history.pop();selected=null;render()};
-document.getElementById('reset').onclick=()=>{nums=[...initial];history=[];selected=null;document.getElementById('numbers').value=initial.join(', ');error.textContent='';render()};render();
-</script></body></html>
+const initial = ["5A", "5B", "3", "1", "2"];
+
+let nums = [...initial];
+let history = [];
+let selected = null;
+let pointerDrag = null;
+let suppressClick = false;
+
+const cards = document.getElementById("cards");
+const count = document.getElementById("count");
+const undo = document.getElementById("undo");
+const error = document.getElementById("error");
+
+// 點擊兩張卡片：交換位置
+function swap(a, b) {
+  selected = null;
+
+  if (a === b) {
+    render();
+    return;
+  }
+
+  history.push([...nums]);
+
+  [nums[a], nums[b]] = [nums[b], nums[a]];
+
+  render();
+}
+
+// 拖曳卡片：插入新位置
+function insert(from, to) {
+  selected = null;
+
+  if (from === to) {
+    render();
+    return;
+  }
+
+  history.push([...nums]);
+
+  // 先取出拖曳的元素
+  const [item] = nums.splice(from, 1);
+
+  // 插入目標位置，其餘元素自動位移
+  nums.splice(to, 0, item);
+
+  render();
+}
+
+function render() {
+  cards.replaceChildren();
+
+  nums.forEach((value, i) => {
+    const card = document.createElement("div");
+
+    card.className = "card" + (selected === i ? " selected" : "");
+    card.dataset.index = i;
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", `位置 ${i}，數字 ${value}`);
+
+    const num = document.createElement("strong");
+    num.textContent = value;
+
+    const idx = document.createElement("small");
+    idx.textContent = i;
+
+    card.append(num, idx);
+
+    // 點擊：選擇兩張卡片進行交換
+    card.addEventListener("click", () => {
+      if (suppressClick) return;
+
+      if (selected === null) {
+        selected = i;
+        render();
+      } else {
+        swap(selected, i);
+      }
+    });
+
+    // 鍵盤操作：Enter 或 Space
+    card.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        card.click();
+      }
+    });
+
+    // 開始拖曳
+    card.addEventListener("pointerdown", e => {
+      if (e.button !== 0) return;
+
+      pointerDrag = {
+        id: e.pointerId,
+        source: i,
+        x: e.clientX,
+        y: e.clientY,
+        moved: false
+      };
+
+      card.setPointerCapture(e.pointerId);
+    });
+
+    // 拖曳過程：顯示目標位置
+    card.addEventListener("pointermove", e => {
+      if (!pointerDrag || pointerDrag.id !== e.pointerId) return;
+
+      if (Math.hypot(
+        e.clientX - pointerDrag.x,
+        e.clientY - pointerDrag.y
+      ) > 8) {
+        pointerDrag.moved = true;
+      }
+
+      if (pointerDrag.moved) {
+        card.classList.add("dragging");
+
+        document.querySelectorAll(".card.over").forEach(c => {
+          c.classList.remove("over");
+        });
+
+        const target = document
+          .elementFromPoint(e.clientX, e.clientY)
+          ?.closest(".card");
+
+        if (target && target !== card && cards.contains(target)) {
+          target.classList.add("over");
+        }
+      }
+    });
+
+    // 放開滑鼠：執行插入，而不是交換
+    card.addEventListener("pointerup", e => {
+      if (!pointerDrag || pointerDrag.id !== e.pointerId) return;
+
+      const drag = pointerDrag;
+      pointerDrag = null;
+
+      if (drag.moved) {
+        const target = document
+          .elementFromPoint(e.clientX, e.clientY)
+          ?.closest(".card");
+
+        suppressClick = true;
+
+        if (target && cards.contains(target)) {
+          insert(drag.source, Number(target.dataset.index));
+        } else {
+          render();
+        }
+
+        setTimeout(() => {
+          suppressClick = false;
+        }, 0);
+      }
+    });
+
+    card.addEventListener("pointercancel", () => {
+      pointerDrag = null;
+      render();
+    });
+
+    cards.append(card);
+  });
+
+  count.textContent = `操作次數：${history.length}`;
+  undo.disabled = history.length === 0;
+}
+
+// 建立新的五張卡片
+document.getElementById("create").onclick = () => {
+  const parts = document
+    .getElementById("numbers")
+    .value.split(",")
+    .map(s => s.trim());
+
+  const valid = parts.every(s =>
+    /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)[A-Za-z]*$/.test(s)
+  );
+
+  if (parts.length !== 5 || !valid) {
+    error.textContent =
+      "請輸入五個數字（可加英文字母標記），例如：5A, 5B, 3, 1, 2";
+    return;
+  }
+
+  error.textContent = "";
+  nums = parts;
+  history = [];
+  selected = null;
+
+  render();
+};
+
+// 回到上一步
+undo.onclick = () => {
+  if (!history.length) return;
+
+  nums = history.pop();
+  selected = null;
+
+  render();
+};
+
+// 重設為原始數字
+document.getElementById("reset").onclick = () => {
+  nums = [...initial];
+  history = [];
+  selected = null;
+
+  document.getElementById("numbers").value = initial.join(", ");
+  error.textContent = "";
+
+  render();
+};
+
+render();
+</script>
+</body>
+</html>
