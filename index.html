@@ -3,178 +3,288 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sorting Practice</title>
 <style>
-  * { box-sizing: border-box; }
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 24px;
+  font-family: system-ui, "Noto Sans TC", sans-serif;
+  color: #202124;
+  background: #f6f7f9;
+}
+.container {
+  max-width: 1050px;
+  margin: auto;
+  padding: 24px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 16px;
+}
+h2, h3 { margin-top: 0; }
+button, input { font: inherit; }
+button {
+  padding: 9px 14px;
+  border: 1px solid #d5d8df;
+  border-radius: 9px;
+  background: white;
+  cursor: pointer;
+}
+button.primary, button.active {
+  color: white;
+  background: #2563eb;
+  border-color: #2563eb;
+}
+button:disabled { opacity: .4; cursor: not-allowed; }
+.mode-bar, .input-row, .actions {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+input {
+  flex: 1;
+  min-width: 180px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 9px;
+}
+.info {
+  padding: 13px;
+  border-radius: 10px;
+  background: #f3f4f6;
+  line-height: 1.7;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+.board {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.card {
+  width: 85px;
+  height: 90px;
+  border: 2px solid #d9dce2;
+  border-radius: 10px;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  user-select: none;
+  cursor: pointer;
+  touch-action: none;
+}
+.card strong { font-size: 23px; }
+.card small { font-size: 11px; color: #777; }
+.card.selected, .card.over {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+.card.empty {
+  border: 2px dashed #2563eb;
+  background: #eff6ff;
+}
+.card.dragging { opacity: .4; }
+.storage {
+  display: none;
+  padding: 16px;
+  border: 2px dashed #b8a7eb;
+  border-radius: 12px;
+  margin: 16px 0;
+}
+.storage.visible { display: block; }
+.key-card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 85px;
+  height: 75px;
+  margin: 10px 12px 0 0;
+  background: #f5f3ff;
+  border: 2px solid #8b5cf6;
+  border-radius: 10px;
+  font-size: 24px;
+  font-weight: bold;
+}
+.status {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+}
+.hidden { display: none !important; }
 
-  body {
-    font-family: system-ui, "Noto Sans TC", sans-serif;
-    background: #f7f8fa;
-    color: #222;
-    padding: 24px;
-    margin: 0;
-  }
+/* Merge Sort Tree */
+.tree-scroll {
+  overflow-x: auto;
+  padding: 12px 0 20px;
+}
+.tree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: max-content;
+}
+.tree-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px;
+}
+.node-box {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  white-space: nowrap;
+}
+.node-box span {
+  min-width: 30px;
+  padding: 7px 5px;
+  text-align: center;
+  border-radius: 5px;
+  background: #e2e8f0;
+  font-size: 13px;
+  font-weight: 600;
+}
+.node-box.done {
+  border-color: #16a34a;
+  background: #f0fdf4;
+}
+.node-box.done span { background: #dcfce7; }
+.node-box.current {
+  border: 2px solid #2563eb;
+  background: #eff6ff;
+}
+.node-box.pending {
+  border-style: dashed;
+  color: #64748b;
+}
+.node-label {
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 5px;
+}
+.children {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  position: relative;
+  padding-top: 18px;
+}
+.children::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  height: 15px;
+  border-left: 1px solid #94a3b8;
+}
+.children > .tree-node {
+  position: relative;
+}
+.children > .tree-node::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  height: 16px;
+  border-left: 1px solid #94a3b8;
+}
 
-  .container {
-    max-width: 900px;
-    margin: auto;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 16px;
-    padding: 24px;
-  }
-
-  h2 { margin-top: 0; }
-
-  .mode-bar, .input-row, .actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 18px;
-  }
-
-  button {
-    padding: 10px 16px;
-    border: 1px solid #d4d4d8;
-    border-radius: 9px;
-    background: white;
-    cursor: pointer;
-    font-size: 14px;
-  }
-
-  button.active, button.primary {
-    background: #2563eb;
-    color: white;
-    border-color: #2563eb;
-  }
-
-  button:disabled {
-    opacity: .4;
-    cursor: not-allowed;
-  }
-
-  input {
-    flex: 1;
-    min-width: 180px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 9px;
-    font-size: 15px;
-  }
-
-  .board {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 10px;
-    margin: 20px 0;
-  }
-
-  .card {
-    min-height: 110px;
-    border: 2px solid #ddd;
-    border-radius: 12px;
-    background: #fafafa;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    user-select: none;
-    touch-action: none;
-  }
-
-  .card strong { font-size: 26px; }
-  .card small { color: #777; }
-
-  .card.selected {
-    border-color: #2563eb;
-    background: #eff6ff;
-  }
-
-  .card.dragging { opacity: .35; }
-
-  .card.over {
-    border-color: #2563eb;
-    background: #dbeafe;
-  }
-
-  .card.empty {
-    border: 2px dashed #2563eb;
-    background: #eff6ff;
-    color: #2563eb;
-    cursor: default;
-  }
-
-  .card.movable {
-    border-color: #f59e0b;
-    background: #fffbeb;
-  }
-
-  .storage {
-    display: none;
-    border: 2px dashed #aaa;
-    border-radius: 12px;
-    padding: 18px;
-    margin: 18px 0;
-    background: #fafafa;
-  }
-
-  .storage.visible { display: block; }
-
-  .storage-content {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  .key-card {
-    width: 100px;
-    height: 85px;
-    border: 2px solid #8b5cf6;
-    background: #f5f3ff;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-    font-weight: bold;
-  }
-
-  .key-card.empty-key {
-    border-style: dashed;
-    color: #999;
-    font-size: 14px;
-    font-weight: normal;
-  }
-
-  .info {
-    padding: 12px;
-    background: #f4f4f5;
-    border-radius: 9px;
-    margin-bottom: 16px;
-    font-size: 14px;
-    line-height: 1.7;
-  }
-
-  .status {
-    margin-top: 16px;
-    font-size: 14px;
-    color: #555;
-  }
-
-  .error { color: #b91c1c; }
-
-  @media (max-width: 550px) {
-    body { padding: 10px; }
-    .container { padding: 14px; }
-    .board { gap: 5px; }
-    .card { min-height: 85px; }
-    .card strong { font-size: 20px; }
-    .key-card { width: 80px; }
-  }
+/* Merge Workspace */
+.workspace {
+  margin-top: 18px;
+  border: 1px solid #d8dce4;
+  border-radius: 13px;
+  padding: 18px;
+}
+.workspace h3 { margin-bottom: 8px; }
+.pointer-info {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.pointer-info span {
+  background: #f1f5f9;
+  padding: 7px 11px;
+  border-radius: 7px;
+  font-family: monospace;
+}
+.merge-sources {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.source-group { min-width: 160px; }
+.source-group h4 { margin: 0 0 10px; }
+.source-cards, .target-cards {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.merge-card {
+  width: 66px;
+  height: 72px;
+  border: 2px solid #cbd5e1;
+  border-radius: 9px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+  font-weight: bold;
+  user-select: none;
+  touch-action: none;
+}
+.merge-card.available {
+  cursor: grab;
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+.merge-card.used {
+  opacity: .3;
+  cursor: default;
+}
+.merge-card.waiting {
+  opacity: .55;
+}
+.merge-card.target {
+  border-style: dashed;
+  background: #f8fafc;
+}
+.merge-card.target.next {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+.merge-card.target.filled {
+  border-style: solid;
+  border-color: #16a34a;
+  background: #f0fdf4;
+}
+.merge-card.over {
+  background: #bfdbfe;
+  border-color: #1d4ed8;
+}
+.note {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+@media(max-width:600px) {
+  body { padding: 8px; }
+  .container { padding: 14px; }
+  .card { width: 60px; height: 75px; }
+  .card strong { font-size: 19px; }
+  .merge-card { width: 53px; height: 60px; }
+}
 </style>
 </head>
 
@@ -183,36 +293,77 @@
   <h2>Sorting Practice</h2>
 
   <div class="mode-bar">
-    <button id="normalBtn" class="active" onclick="changeMode('normal')">
+    <button id="normalBtn" onclick="changeMode('normal')">
       Normal Mode
     </button>
     <button id="storageBtn" onclick="changeMode('storage')">
       Insertion Storage Mode
     </button>
+    <button id="mergeBtn" onclick="changeMode('merge')">
+      Merge Sort Mode
+    </button>
   </div>
 
   <div class="input-row">
     <input id="numberInput" value="5A, 5B, 3, 1, 2">
-    <button class="primary" onclick="createCards()">建立卡片</button>
+    <button class="primary" onclick="createCards()">
+      建立卡片
+    </button>
   </div>
 
   <div id="instructions" class="info"></div>
 
-  <div id="storageArea" class="storage">
-    <strong>Key Storage（暫存區）</strong>
-    <p style="font-size:13px;color:#666">
-      模擬 Python 的 key = arr[i]
-    </p>
-    <div class="storage-content">
-      <div id="keyCard" class="key-card empty-key">尚未取出</div>
-      <button id="insertBtn" class="primary"
-              onclick="insertKey()" disabled>
+  <!-- Normal / Insertion -->
+  <section id="standardSection">
+    <div id="storageArea" class="storage">
+      <strong>Key Storage</strong>
+      <p class="note">模擬 key = arr[i]</p>
+      <div id="keyCard" class="key-card">—</div>
+      <button class="primary" onclick="insertKey()">
         插入 Key
       </button>
     </div>
-  </div>
+    <div id="board" class="board"></div>
+  </section>
 
-  <div id="board" class="board"></div>
+  <!-- Merge Sort -->
+  <section id="mergeSection" class="hidden">
+    <div class="actions">
+      <button id="divideBtn" class="primary"
+              onclick="divideStep()">Divide 下一層</button>
+      <button id="startMergeBtn" onclick="startMerge()">
+        Start Merge
+      </button>
+      <button id="nextMergeBtn" onclick="nextMerge()">
+        Next Merge
+      </button>
+    </div>
+
+    <h3>Divide and Conquer Tree</h3>
+    <div class="tree-scroll">
+      <div id="mergeTree" class="tree"></div>
+    </div>
+
+    <div id="mergeWorkspace" class="workspace hidden">
+      <h3 id="mergeTitle">Merge</h3>
+      <div id="pointerInfo" class="pointer-info"></div>
+
+      <div class="merge-sources">
+        <div class="source-group">
+          <h4>L（左半部）</h4>
+          <div id="leftCards" class="source-cards"></div>
+        </div>
+        <div class="source-group">
+          <h4>R（右半部）</h4>
+          <div id="rightCards" class="source-cards"></div>
+        </div>
+      </div>
+
+      <h4>arr（合併結果）</h4>
+      <div id="targetCards" class="target-cards"></div>
+      <p id="mergeHint" class="note"></p>
+    </div>
+  </section>
 
   <div class="actions">
     <button id="undoBtn" onclick="undo()">↶ 上一步</button>
@@ -225,341 +376,110 @@
 <script>
 let initial = ["5A", "5B", "3", "1", "2"];
 let arr = [...initial];
-
 let mode = "normal";
 let selected = null;
 let key = null;
 let emptyIndex = null;
 let history = [];
 
-let dragState = null;
+let treeRoot = null;
+let divideDepth = 0;
+let mergeTasks = [];
+let taskIndex = -1;
+let mergeOutput = [];
+let leftIndex = 0;
+let rightIndex = 0;
+let mergeStarted = false;
+
+let pointerDrag = null;
 let suppressClick = false;
 
-// 儲存操作前的狀態
+// 解析數值，A/B/C 只是標籤
+function numericValue(value) {
+  return parseFloat(value);
+}
+
 function saveHistory() {
   history.push({
     arr: [...arr],
-    key: key,
-    emptyIndex: emptyIndex,
-    selected: selected
+    selected,
+    key,
+    emptyIndex,
+    divideDepth,
+    taskIndex,
+    mergeOutput: [...mergeOutput],
+    leftIndex,
+    rightIndex,
+    mergeStarted,
+    treeState: treeRoot ? serializeTree(treeRoot) : null
   });
 }
 
-// 切換模式
-function changeMode(newMode) {
-  // 切換時保留目前完整排序結果
-  // 如果正在暫存 key，先取消該輪
+function serializeTree(node) {
+  return {
+    values: [...node.values],
+    result: node.result ? [...node.result] : null,
+    id: node.id,
+    depth: node.depth,
+    left: node.left ? serializeTree(node.left) : null,
+    right: node.right ? serializeTree(node.right) : null
+  };
+}
+
+function restoreTree(data) {
+  if (!data) return null;
+  return {
+    ...data,
+    values: [...data.values],
+    result: data.result ? [...data.result] : null,
+    left: restoreTree(data.left),
+    right: restoreTree(data.right)
+  };
+}
+
+function restoreState(s) {
+  arr = [...s.arr];
+  selected = s.selected;
+  key = s.key;
+  emptyIndex = s.emptyIndex;
+  divideDepth = s.divideDepth;
+  taskIndex = s.taskIndex;
+  mergeOutput = [...s.mergeOutput];
+  leftIndex = s.leftIndex;
+  rightIndex = s.rightIndex;
+  mergeStarted = s.mergeStarted;
+  treeRoot = restoreTree(s.treeState);
+
+  if (treeRoot) {
+    mergeTasks = [];
+    collectTasks(treeRoot);
+  } else {
+    mergeTasks = [];
+  }
+}
+
+function changeMode(nextMode) {
+  // 若暫存區還有 key，先取消該輪
   if (key !== null) {
     while (history.length && key !== null) {
-      const previous = history.pop();
-      restoreState(previous);
+      restoreState(history.pop());
     }
   }
 
-  mode = newMode;
+  mode = nextMode;
   selected = null;
   history = [];
-  render();
-}
 
-// Normal Mode：交換
-function swap(a, b) {
-  if (a === b) {
-    selected = null;
-    render();
-    return;
+  if (mode === "merge") {
+    initMerge();
   }
 
-  saveHistory();
-
-  [arr[a], arr[b]] = [arr[b], arr[a]];
-
-  selected = null;
-  render();
-}
-
-// Normal Mode：拖曳插入
-function moveInsert(from, to) {
-  if (from === to) {
-    render();
-    return;
-  }
-
-  saveHistory();
-
-  const [item] = arr.splice(from, 1);
-  arr.splice(to, 0, item);
-
-  selected = null;
-  render();
-}
-
-// Storage Mode：取出 key
-function takeKey(index) {
-  if (key !== null) return;
-
-  saveHistory();
-
-  key = arr[index];
-  arr[index] = null;
-  emptyIndex = index;
-
-  render();
-}
-
-// Storage Mode：將左邊元素往右移一格
-function shiftRight(index) {
-  if (key === null || emptyIndex === null) return;
-
-  // 只能移動空格正左邊的元素
-  if (index !== emptyIndex - 1) return;
-
-  saveHistory();
-
-  arr[emptyIndex] = arr[index];
-  arr[index] = null;
-  emptyIndex = index;
-
-  render();
-}
-
-// Storage Mode：把 key 放回空格
-function insertKey() {
-  if (key === null || emptyIndex === null) return;
-
-  saveHistory();
-
-  arr[emptyIndex] = key;
-  key = null;
-  emptyIndex = null;
-
-  render();
-}
-
-function handleCardClick(index) {
-  if (mode === "normal") {
-    if (selected === null) {
-      selected = index;
-      render();
-    } else {
-      swap(selected, index);
-    }
-    return;
-  }
-
-  // Storage Mode
-  if (key === null) {
-    takeKey(index);
-  } else {
-    shiftRight(index);
-  }
-}
-
-function render() {
-  document.getElementById("normalBtn").classList.toggle(
-    "active", mode === "normal"
-  );
-  document.getElementById("storageBtn").classList.toggle(
-    "active", mode === "storage"
-  );
-
-  const instructions = document.getElementById("instructions");
-  const storageArea = document.getElementById("storageArea");
-
-  if (mode === "normal") {
-    instructions.innerHTML = `
-      <strong>Normal Mode</strong><br>
-      點擊兩張卡片：Swap（交換）。<br>
-      拖曳卡片到另一個位置：Insert（插入）。
-    `;
-    storageArea.classList.remove("visible");
-  } else {
-    instructions.innerHTML = `
-      <strong>Insertion Storage Mode</strong><br>
-      ① 點擊卡片，把它取出成為 key。<br>
-      ② 點擊虛線空格左邊的卡片，讓它往右移。<br>
-      ③ 重複移動，直到找到正確位置。<br>
-      ④ 按「插入 Key」，把 key 放進空格。
-    `;
-    storageArea.classList.add("visible");
-  }
-
-  const keyCard = document.getElementById("keyCard");
-  keyCard.textContent = key === null ? "尚未取出" : key;
-  keyCard.classList.toggle("empty-key", key === null);
-
-  document.getElementById("insertBtn").disabled = key === null;
-
-  const board = document.getElementById("board");
-  board.replaceChildren();
-
-  arr.forEach((value, index) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.dataset.index = index;
-    card.tabIndex = 0;
-    card.setAttribute("role", "button");
-
-    if (value === null) {
-      card.classList.add("empty");
-      const label = document.createElement("strong");
-      label.textContent = "空格";
-      card.append(label);
-    } else {
-      const label = document.createElement("strong");
-      label.textContent = value;
-      card.append(label);
-    }
-
-    const indexLabel = document.createElement("small");
-    indexLabel.textContent = "Index " + index;
-    card.append(indexLabel);
-
-    if (mode === "normal" && selected === index) {
-      card.classList.add("selected");
-    }
-
-    if (mode === "storage" &&
-        key !== null &&
-        index === emptyIndex - 1) {
-      card.classList.add("movable");
-    }
-
-    card.addEventListener("click", () => {
-      if (suppressClick) return;
-      if (value === null) return;
-      handleCardClick(index);
-    });
-
-    card.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        card.click();
-      }
-    });
-
-    // 只有 Normal Mode 支援拖曳插入
-    if (mode === "normal") {
-      card.addEventListener("pointerdown", e => {
-        if (e.button !== 0) return;
-
-        dragState = {
-          pointerId: e.pointerId,
-          from: index,
-          x: e.clientX,
-          y: e.clientY,
-          moved: false
-        };
-
-        card.setPointerCapture(e.pointerId);
-      });
-
-      card.addEventListener("pointermove", e => {
-        if (!dragState ||
-            dragState.pointerId !== e.pointerId) return;
-
-        if (Math.hypot(
-          e.clientX - dragState.x,
-          e.clientY - dragState.y
-        ) > 8) {
-          dragState.moved = true;
-        }
-
-        if (!dragState.moved) return;
-
-        card.classList.add("dragging");
-
-        document.querySelectorAll(".card.over").forEach(c => {
-          c.classList.remove("over");
-        });
-
-        const target = document
-          .elementFromPoint(e.clientX, e.clientY)
-          ?.closest(".card");
-
-        if (target && board.contains(target)) {
-          target.classList.add("over");
-        }
-      });
-
-      card.addEventListener("pointerup", e => {
-        if (!dragState ||
-            dragState.pointerId !== e.pointerId) return;
-
-        const drag = dragState;
-        dragState = null;
-
-        if (!drag.moved) return;
-
-        const target = document
-          .elementFromPoint(e.clientX, e.clientY)
-          ?.closest(".card");
-
-        suppressClick = true;
-
-        if (target && board.contains(target)) {
-          moveInsert(drag.from, Number(target.dataset.index));
-        } else {
-          render();
-        }
-
-        setTimeout(() => {
-          suppressClick = false;
-        }, 0);
-      });
-
-      card.addEventListener("pointercancel", () => {
-        dragState = null;
-        render();
-      });
-    }
-
-    board.append(card);
-  });
-
-  document.getElementById("undoBtn").disabled =
-    history.length === 0;
-
-  let message = `操作次數：${history.length}`;
-
-  if (mode === "storage" && key !== null) {
-    message += ` ｜ Key = ${key} ｜ 空格位置 = ${emptyIndex}`;
-
-    if (emptyIndex > 0) {
-      message += ` ｜ 可將 Index ${emptyIndex - 1} 往右移`;
-    }
-  }
-
-  document.getElementById("status").textContent = message;
-}
-
-function restoreState(state) {
-  arr = [...state.arr];
-  key = state.key;
-  emptyIndex = state.emptyIndex;
-  selected = state.selected;
-}
-
-function undo() {
-  if (!history.length) return;
-
-  restoreState(history.pop());
-  render();
-}
-
-function reset() {
-  arr = [...initial];
-  key = null;
-  emptyIndex = null;
-  selected = null;
-  history = [];
   render();
 }
 
 function createCards() {
-  const input = document.getElementById("numberInput").value;
-
-  const values = input.split(",").map(v => v.trim());
+  const values = document.getElementById("numberInput")
+    .value.split(",").map(x => x.trim());
 
   const valid = values.length === 5 &&
     values.every(v =>
@@ -569,17 +489,627 @@ function createCards() {
   if (!valid) {
     document.getElementById("status").textContent =
       "請輸入五個數字，例如：5A, 5B, 3, 1, 2";
-    document.getElementById("status").classList.add("error");
     return;
   }
-
-  document.getElementById("status").classList.remove("error");
 
   initial = [...values];
   reset();
 }
 
-render();
+function reset() {
+  arr = [...initial];
+  selected = null;
+  key = null;
+  emptyIndex = null;
+  history = [];
+
+  initMerge();
+  render();
+}
+
+// ==============================
+// Normal Mode
+// ==============================
+
+function swap(a, b) {
+  if (a === b) {
+    selected = null;
+    render();
+    return;
+  }
+
+  saveHistory();
+  [arr[a], arr[b]] = [arr[b], arr[a]];
+  selected = null;
+  render();
+}
+
+function moveInsert(from, to) {
+  if (from === to) {
+    render();
+    return;
+  }
+
+  saveHistory();
+  const [item] = arr.splice(from, 1);
+  arr.splice(to, 0, item);
+  selected = null;
+  render();
+}
+
+// ==============================
+// Insertion Storage Mode
+// ==============================
+
+function takeKey(index) {
+  if (key !== null) return;
+
+  saveHistory();
+  key = arr[index];
+  arr[index] = null;
+  emptyIndex = index;
+  render();
+}
+
+function shiftRight(index) {
+  if (key === null || index !== emptyIndex - 1) return;
+
+  saveHistory();
+  arr[emptyIndex] = arr[index];
+  arr[index] = null;
+  emptyIndex = index;
+  render();
+}
+
+function insertKey() {
+  if (key === null) return;
+
+  saveHistory();
+  arr[emptyIndex] = key;
+  key = null;
+  emptyIndex = null;
+  render();
+}
+
+// ==============================
+// Merge Sort: Divide Tree
+// ==============================
+
+let nodeCounter = 0;
+
+function buildTree(values, depth = 0) {
+  const node = {
+    id: nodeCounter++,
+    values: [...values],
+    result: null,
+    depth,
+    left: null,
+    right: null
+  };
+
+  if (values.length > 1) {
+    const mid = Math.floor(values.length / 2);
+
+    node.left = buildTree(values.slice(0, mid), depth + 1);
+    node.right = buildTree(values.slice(mid), depth + 1);
+  } else {
+    node.result = [...values];
+  }
+
+  return node;
+}
+
+function initMerge() {
+  nodeCounter = 0;
+  treeRoot = buildTree(initial);
+  divideDepth = 0;
+  mergeTasks = [];
+  collectTasks(treeRoot);
+  taskIndex = -1;
+  mergeOutput = [];
+  leftIndex = 0;
+  rightIndex = 0;
+  mergeStarted = false;
+}
+
+// Postorder：先處理左右子樹，最後處理父節點
+function collectTasks(node) {
+  if (!node.left) return;
+
+  collectTasks(node.left);
+  collectTasks(node.right);
+  mergeTasks.push(node);
+}
+
+function maxDepth(node) {
+  if (!node.left) return node.depth;
+
+  return Math.max(
+    maxDepth(node.left),
+    maxDepth(node.right)
+  );
+}
+
+function divideStep() {
+  if (mergeStarted || divideDepth >= maxDepth(treeRoot)) return;
+
+  saveHistory();
+  divideDepth++;
+  render();
+}
+
+function renderTreeNode(node) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "tree-node";
+
+  const label = document.createElement("div");
+  label.className = "node-label";
+  label.textContent = "Depth " + node.depth;
+  wrapper.append(label);
+
+  const box = document.createElement("div");
+  box.className = "node-box";
+
+  if (node.result !== null) box.classList.add("done");
+
+  if (mergeStarted &&
+      taskIndex >= 0 &&
+      mergeTasks[taskIndex]?.id === node.id &&
+      node.result === null) {
+    box.classList.add("current");
+  }
+
+  const display = node.result !== null
+    ? node.result
+    : node.values;
+
+  display.forEach(value => {
+    const span = document.createElement("span");
+    span.textContent = value;
+    box.append(span);
+  });
+
+  wrapper.append(box);
+
+  if (node.left && node.depth < divideDepth) {
+    const children = document.createElement("div");
+    children.className = "children";
+    children.append(
+      renderTreeNode(node.left),
+      renderTreeNode(node.right)
+    );
+    wrapper.append(children);
+  }
+
+  return wrapper;
+}
+
+// ==============================
+// Merge Sort: Manual Merge
+// ==============================
+
+function startMerge() {
+  if (divideDepth < maxDepth(treeRoot) || mergeStarted) return;
+
+  saveHistory();
+  mergeStarted = true;
+  taskIndex = 0;
+  beginCurrentTask();
+  render();
+}
+
+function currentTask() {
+  return mergeTasks[taskIndex];
+}
+
+function beginCurrentTask() {
+  mergeOutput = [];
+  leftIndex = 0;
+  rightIndex = 0;
+}
+
+function isTaskComplete() {
+  const task = currentTask();
+  return !!task &&
+    mergeOutput.length === task.values.length;
+}
+
+// 學生選取 L[i] 或 R[j] 填入 arr[k]
+function chooseMergeElement(side) {
+  const task = currentTask();
+
+  if (!task || isTaskComplete()) return;
+
+  const L = task.left.result;
+  const R = task.right.result;
+
+  let value;
+
+  if (side === "L") {
+    if (leftIndex >= L.length) return;
+    value = L[leftIndex];
+  } else {
+    if (rightIndex >= R.length) return;
+    value = R[rightIndex];
+  }
+
+  saveHistory();
+
+  mergeOutput.push(value);
+
+  if (side === "L") {
+    leftIndex++;
+  } else {
+    rightIndex++;
+  }
+
+  // arr 填滿後，將結果寫回父節點
+  if (isTaskComplete()) {
+    task.result = [...mergeOutput];
+  }
+
+  render();
+}
+
+function nextMerge() {
+  if (!mergeStarted || !isTaskComplete()) return;
+  if (taskIndex >= mergeTasks.length - 1) return;
+
+  saveHistory();
+  taskIndex++;
+  beginCurrentTask();
+  render();
+}
+
+// ==============================
+// Render
+// ==============================
+
+function render() {
+  document.getElementById("normalBtn").classList.toggle(
+    "active", mode === "normal"
+  );
+  document.getElementById("storageBtn").classList.toggle(
+    "active", mode === "storage"
+  );
+  document.getElementById("mergeBtn").classList.toggle(
+    "active", mode === "merge"
+  );
+
+  document.getElementById("standardSection").classList.toggle(
+    "hidden", mode === "merge"
+  );
+  document.getElementById("mergeSection").classList.toggle(
+    "hidden", mode !== "merge"
+  );
+
+  const instructions = document.getElementById("instructions");
+
+  if (mode === "normal") {
+    instructions.innerHTML =
+      "<b>Normal Mode</b><br>" +
+      "點擊兩張卡片：交換 Swap。<br>" +
+      "拖曳一張卡片到另一個位置：插入 Insert。";
+  } else if (mode === "storage") {
+    instructions.innerHTML =
+      "<b>Insertion Storage Mode</b><br>" +
+      "① 點擊卡片取出 key。<br>" +
+      "② 點擊空格左邊的卡片，讓它向右移。<br>" +
+      "③ 最後按「插入 Key」。";
+  } else {
+    instructions.innerHTML =
+      "<b>Merge Sort Mode</b><br>" +
+      "① 按 Divide，逐層拆分陣列。<br>" +
+      "② 按 Start Merge，從最底層開始合併。<br>" +
+      "③ 點擊或拖曳 L[i]、R[j] 到 arr[k]。<br>" +
+      "④ 填滿 arr 後，按 Next Merge。";
+  }
+
+  if (mode === "merge") {
+    renderMerge();
+  } else {
+    renderStandard();
+  }
+
+  document.getElementById("undoBtn").disabled =
+    history.length === 0;
+}
+
+function renderStandard() {
+  const storage = document.getElementById("storageArea");
+  storage.classList.toggle("visible", mode === "storage");
+
+  document.getElementById("keyCard").textContent = key ?? "—";
+
+  const board = document.getElementById("board");
+  board.replaceChildren();
+
+  arr.forEach((value, index) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.index = index;
+
+    if (value === null) card.classList.add("empty");
+    if (selected === index) card.classList.add("selected");
+
+    const number = document.createElement("strong");
+    number.textContent = value ?? "—";
+
+    const idx = document.createElement("small");
+    idx.textContent = "Index " + index;
+
+    card.append(number, idx);
+
+    card.onclick = () => {
+      if (suppressClick || value === null) return;
+
+      if (mode === "normal") {
+        if (selected === null) {
+          selected = index;
+          render();
+        } else {
+          swap(selected, index);
+        }
+      } else if (key === null) {
+        takeKey(index);
+      } else {
+        shiftRight(index);
+      }
+    };
+
+    if (mode === "normal") {
+      attachDrag(card, index, (from, to) => {
+        moveInsert(from, to);
+      });
+    }
+
+    board.append(card);
+  });
+
+  document.getElementById("status").textContent =
+    "操作次數：" + history.length +
+    (key !== null ? " ｜ Key = " + key +
+      " ｜ 空格 Index = " + emptyIndex : "");
+}
+
+function attachDrag(card, index, callback) {
+  card.addEventListener("pointerdown", e => {
+    if (e.button !== 0) return;
+
+    pointerDrag = {
+      id: e.pointerId,
+      from: index,
+      x: e.clientX,
+      y: e.clientY,
+      moved: false
+    };
+
+    card.setPointerCapture(e.pointerId);
+  });
+
+  card.addEventListener("pointermove", e => {
+    if (!pointerDrag || pointerDrag.id !== e.pointerId) return;
+
+    if (Math.hypot(
+      e.clientX - pointerDrag.x,
+      e.clientY - pointerDrag.y
+    ) > 8) {
+      pointerDrag.moved = true;
+      card.classList.add("dragging");
+    }
+  });
+
+  card.addEventListener("pointerup", e => {
+    if (!pointerDrag || pointerDrag.id !== e.pointerId) return;
+
+    const drag = pointerDrag;
+    pointerDrag = null;
+
+    if (!drag.moved) return;
+
+    const target = document
+      .elementFromPoint(e.clientX, e.clientY)
+      ?.closest(".card");
+
+    suppressClick = true;
+
+    if (target && target.parentElement === card.parentElement) {
+      callback(drag.from, Number(target.dataset.index));
+    } else {
+      render();
+    }
+
+    setTimeout(() => suppressClick = false, 0);
+  });
+
+  card.addEventListener("pointercancel", () => {
+    pointerDrag = null;
+    render();
+  });
+}
+
+function renderMerge() {
+  const tree = document.getElementById("mergeTree");
+  tree.replaceChildren(renderTreeNode(treeRoot));
+
+  const fullyDivided = divideDepth >= maxDepth(treeRoot);
+
+  document.getElementById("divideBtn").disabled =
+    fullyDivided || mergeStarted;
+
+  document.getElementById("startMergeBtn").disabled =
+    !fullyDivided || mergeStarted;
+
+  const nextBtn = document.getElementById("nextMergeBtn");
+  nextBtn.disabled =
+    !mergeStarted ||
+    !isTaskComplete() ||
+    taskIndex >= mergeTasks.length - 1;
+
+  const workspace = document.getElementById("mergeWorkspace");
+  workspace.classList.toggle("hidden", !mergeStarted);
+
+  if (!mergeStarted) {
+    document.getElementById("status").textContent =
+      fullyDivided
+        ? "Divide 完成！現在可以開始 Merge。"
+        : "目前拆分深度：" + divideDepth +
+          " / " + maxDepth(treeRoot);
+    return;
+  }
+
+  const task = currentTask();
+  const L = task.left.result;
+  const R = task.right.result;
+
+  document.getElementById("mergeTitle").textContent =
+    "Merge " + (taskIndex + 1) + " / " +
+    mergeTasks.length +
+    " ｜ arr 長度：" + task.values.length;
+
+  document.getElementById("pointerInfo").innerHTML =
+    "<span>i = " + leftIndex + "</span>" +
+    "<span>j = " + rightIndex + "</span>" +
+    "<span>k = " + mergeOutput.length + "</span>";
+
+  renderSource("leftCards", L, leftIndex, "L");
+  renderSource("rightCards", R, rightIndex, "R");
+  renderTarget(task.values.length);
+
+  const complete = isTaskComplete();
+
+  document.getElementById("mergeHint").textContent =
+    complete
+      ? "這組 arr 已經填滿，可以按 Next Merge。"
+      : leftIndex === L.length
+        ? "L 已經用完，接下來將 R 剩餘元素放入 arr。"
+        : rightIndex === R.length
+          ? "R 已經用完，接下來將 L 剩餘元素放入 arr。"
+          : "比較 L[i] 與 R[j]，選擇要放入 arr[k] 的元素。";
+
+  const allDone =
+    complete && taskIndex === mergeTasks.length - 1;
+
+  document.getElementById("status").textContent =
+    allDone
+      ? "Merge Sort 完成！結果：" + task.result.join(", ")
+      : "目前正在處理第 " + (taskIndex + 1) +
+        " / " + mergeTasks.length + " 組合併";
+}
+
+function renderSource(containerId, values, usedCount, side) {
+  const container = document.getElementById(containerId);
+  container.replaceChildren();
+
+  values.forEach((value, index) => {
+    const card = document.createElement("div");
+    card.className = "merge-card";
+    card.textContent = value;
+
+    if (index < usedCount) {
+      card.classList.add("used");
+    } else if (index === usedCount) {
+      card.classList.add("available");
+    } else {
+      card.classList.add("waiting");
+    }
+
+    // 只有目前指標位置可以使用
+    if (index === usedCount) {
+      card.onclick = () => {
+        if (!suppressClick) chooseMergeElement(side);
+      };
+
+      card.addEventListener("pointerdown", e => {
+        if (e.button !== 0) return;
+
+        pointerDrag = {
+          id: e.pointerId,
+          side,
+          x: e.clientX,
+          y: e.clientY,
+          moved: false
+        };
+
+        card.setPointerCapture(e.pointerId);
+      });
+
+      card.addEventListener("pointermove", e => {
+        if (!pointerDrag || pointerDrag.id !== e.pointerId) return;
+
+        if (Math.hypot(
+          e.clientX - pointerDrag.x,
+          e.clientY - pointerDrag.y
+        ) > 8) {
+          pointerDrag.moved = true;
+          card.classList.add("dragging");
+        }
+      });
+
+      card.addEventListener("pointerup", e => {
+        if (!pointerDrag || pointerDrag.id !== e.pointerId) return;
+
+        const drag = pointerDrag;
+        pointerDrag = null;
+
+        if (!drag.moved) return;
+
+        const target = document
+          .elementFromPoint(e.clientX, e.clientY)
+          ?.closest(".merge-card.target.next");
+
+        suppressClick = true;
+
+        if (target) {
+          chooseMergeElement(drag.side);
+        } else {
+          render();
+        }
+
+        setTimeout(() => suppressClick = false, 0);
+      });
+
+      card.addEventListener("pointercancel", () => {
+        pointerDrag = null;
+        render();
+      });
+    }
+
+    container.append(card);
+  });
+}
+
+function renderTarget(length) {
+  const container = document.getElementById("targetCards");
+  container.replaceChildren();
+
+  for (let index = 0; index < length; index++) {
+    const card = document.createElement("div");
+    card.className = "merge-card target";
+
+    if (index < mergeOutput.length) {
+      card.classList.add("filled");
+      card.textContent = mergeOutput[index];
+    } else {
+      card.textContent = "—";
+
+      if (index === mergeOutput.length) {
+        card.classList.add("next");
+      }
+    }
+
+    container.append(card);
+  }
+}
+
+function undo() {
+  if (!history.length) return;
+
+  restoreState(history.pop());
+  render();
+}
+
+reset();
 </script>
 </body>
 </html>
