@@ -1,6 +1,5 @@
 
 from collections import deque
-import heapq
 
 # =====================================
 # 1. 輸入區（Input）
@@ -37,22 +36,36 @@ while True:
             # 加入元素
             stack.append(value)
             queue.append(value)
-            heapq.heappush(priority_queue, -value)
+            priority_queue.append(value)
 
         elif command == 2:
-            # Stack：後進先出
-            if not stack or stack.pop() != value:
-                is_stack = False
 
-            # Queue：先進先出
-            if not queue or queue.popleft() != value:
+            # Stack：後進先出（LIFO）
+            if not stack:
+                is_stack = False
+            else:
+                if stack.pop() != value:
+                    is_stack = False
+
+            # Queue：先進先出（FIFO）
+            if not queue:
                 is_queue = False
+            else:
+                if queue.popleft() != value:
+                    is_queue = False
 
             # Priority Queue：最大值優先
-            if (not priority_queue or
-                -heapq.heappop(priority_queue) != value):
+            if not priority_queue:
                 is_priority_queue = False
+            else:
+                largest = max(priority_queue)
+                priority_queue.remove(largest)
 
+                if largest != value:
+                    is_priority_queue = False
+
+
+    # 判斷還有哪些資料結構符合
     possible = []
 
     if is_stack:
